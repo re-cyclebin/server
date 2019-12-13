@@ -153,7 +153,7 @@ describe('Testing for Trash Can Routes', _ => {
             done();
           })
       })
-      it('should send an object msg with 403 status code because jwt malformed', done => {
+      it('should send an object msg with 403 status code because Invalid Token', done => {
         chai
           .request(app)
           .post(link)
@@ -164,7 +164,7 @@ describe('Testing for Trash Can Routes', _ => {
             expect(res).to.have.status(403);
             expect(res.body).to.be.an('object').to.have.any.keys('msg');
             expect(res.body.msg).to.be.a('string');
-            expect(res.body.msg).to.equal('jwt malformed')
+            expect(res.body.msg).to.equal('Invalid Token')
             done();
           })
       })
@@ -195,7 +195,7 @@ describe('Testing for Trash Can Routes', _ => {
     })
 
     describe('error process get All data trascan', _ => {
-      it('should send an object msg with 403 status code because jwt malformed', done => {
+      it('should send an object msg with 403 status code because Invalid Token', done => {
         chai
           .request(app)
           .get(link)
@@ -205,7 +205,7 @@ describe('Testing for Trash Can Routes', _ => {
             expect(res).to.have.status(403);
             expect(res.body).to.be.an('object').to.have.any.keys('msg');
             expect(res.body.msg).to.be.a('string');
-            expect(res.body.msg).to.equal('jwt malformed');
+            expect(res.body.msg).to.equal('Invalid Token');
             done();
           })
       })
@@ -300,7 +300,7 @@ describe('Testing for Trash Can Routes', _ => {
             done()
           })
       })
-      it('should send an object msg with 403 status code because jwt malformed', done => {
+      it('should send an object msg with 403 status code because Invalid Token', done => {
         chai
           .request(app)
           .patch(link+`/${initialTrash._id}`)
@@ -311,7 +311,7 @@ describe('Testing for Trash Can Routes', _ => {
             expect(res).to.have.status(403);
             expect(res.body).to.be.an('object').to.have.any.keys('msg');
             expect(res.body.msg).to.be.a('string');
-            expect(res.body.msg).to.equal('jwt malformed');
+            expect(res.body.msg).to.equal('Invalid Token');
             done();
           })
       })
@@ -428,7 +428,7 @@ describe('Testing for Trash Can Routes', _ => {
             done()
           })
       })
-      it('should send an object msg with 403 status code because jwt malformed', done => {
+      it('should send an object msg with 403 status code because Invalid Token', done => {
         chai
           .request(app)
           .patch(link+`/${initialTrash._id}`)
@@ -439,7 +439,7 @@ describe('Testing for Trash Can Routes', _ => {
             expect(res).to.have.status(403);
             expect(res.body).to.be.an('object').to.have.any.keys('msg');
             expect(res.body.msg).to.be.a('string');
-            expect(res.body.msg).to.equal('jwt malformed');
+            expect(res.body.msg).to.equal('Invalid Token');
             done();
           })
       })
@@ -511,7 +511,7 @@ describe('Testing for Trash Can Routes', _ => {
             done()
           })
       })
-      it('should send an object msg with 403 status code because jwt malformed', done => {
+      it('should send an object msg with 403 status code because Invalid Token', done => {
         chai
           .request(app)
           .delete(link+`/${initialTrash._id}`)
@@ -521,7 +521,7 @@ describe('Testing for Trash Can Routes', _ => {
             expect(res).to.have.status(403);
             expect(res.body).to.be.an('object').to.have.any.keys('msg');
             expect(res.body.msg).to.be.a('string');
-            expect(res.body.msg).to.equal('jwt malformed');
+            expect(res.body.msg).to.equal('Invalid Token');
             done();
           })
       })

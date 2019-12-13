@@ -365,7 +365,7 @@ describe('Testing for User Routes', _ => {
             done()
           })
       })
-      it('should send an object msg with 403 status code because jwt malformed', done => {
+      it('should send an object msg with 403 status code because Invalid Token', done => {
         chai
           .request(app)
           .get(link)
@@ -375,7 +375,7 @@ describe('Testing for User Routes', _ => {
             expect(res).to.have.status(403);
             expect(res.body).to.be.an('object').to.have.any.keys('msg');
             expect(res.body.msg).to.be.a('string');
-            expect(res.body.msg).to.equal('jwt malformed');
+            expect(res.body.msg).to.equal('Invalid Token');
             done()
           })
       })
@@ -553,7 +553,7 @@ describe('Testing for User Routes', _ => {
           done()
         })
     })
-    it('should send an object msg with 403 status code because jwt malformed', done => {
+    it('should send an object msg with 403 status code because Invalid Token', done => {
       updatePoint(50000)
       let chooseReward = { getReward: 18000 };
       chai
@@ -566,7 +566,7 @@ describe('Testing for User Routes', _ => {
           expect(res).to.have.status(403);
           expect(res.body).to.be.an('object').to.have.any.keys('msg');
           expect(res.body.msg).to.be.a('string');
-          expect(res.body.msg).to.equal('jwt malformed');
+          expect(res.body.msg).to.equal('Invalid Token');
           done()
         })
     })

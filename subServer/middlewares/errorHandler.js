@@ -12,7 +12,11 @@ module.exports = (err, req, res, next) => {
       errors
     })
   } else if(err.name == 'JsonWebTokenError') {
-    res.status(403).json({msg: err.message})
+    if(err.message === 'jwt malformed') {
+      res.status(403).json({ msg: 'Invalid Token' })
+    } else {
+      res.status(403).json({msg: err.message})
+    }
   } else if(err.kind == 'ObjectId') {
     res.status(404).json({ msg: 'searching not found'})
   }
