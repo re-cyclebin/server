@@ -315,50 +315,6 @@ describe('Testing for Trash Can Routes', _ => {
             done()
           })
       })
-      // it('should send an object msg with 403 status code because Do not have access', done => {
-      //   chai
-      //     .request(app)
-      //     .post(link+`/${initialTrash._id}`)
-      //     .set('token', initialTokenPull)
-      //     .send(update)
-      //     .end((err, res) => {
-      //       expect(err).to.be.null;
-      //       expect(res).to.have.status(403);
-      //       expect(res.body).to.be.an('object').to.have.any.keys('msg');
-      //       expect(res.body.msg).to.be.a('string');
-      //       expect(res.body.msg).to.equal('Do not have access');
-      //       done()
-      //     })
-      // })
-      // it('should send an object msg with 403 status code because Invalid Token', done => {
-      //   chai
-      //     .request(app)
-      //     .post(link+`/${initialTrash._id}`)
-      //     .set('token', falseToken)
-      //     .send(update)
-      //     .end((err, res) => {
-      //       expect(err).to.be.null;
-      //       expect(res).to.have.status(403);
-      //       expect(res.body).to.be.an('object').to.have.any.keys('msg');
-      //       expect(res.body.msg).to.be.a('string');
-      //       expect(res.body.msg).to.equal('Invalid Token');
-      //       done();
-      //     })
-      // })
-      // it('should send an object msg with 403 status code because missing token', done => {
-      //   chai
-      //     .request(app)
-      //     .post(link+`/${initialTrash._id}`)
-      //     .send(update)
-      //     .end((err, res) => {
-      //       expect(err).to.be.null;
-      //       expect(res).to.have.status(403);
-      //       expect(res.body).to.be.an('object').to.have.any.keys('msg');
-      //       expect(res.body.msg).to.be.a('string');
-      //       expect(res.body.msg).to.equal('Authentication Error');
-      //       done()
-      //     })
-      // })
       it('should send an object msg with 404 status code because invalid trashcan id', done => {
         let falseLink = `/trashcan/push/jeiofewjfiqwifjq12`;
         chai
@@ -666,8 +622,7 @@ describe('Testing for Trash Can Routes', _ => {
           .end((err, res) => {
             expect(err).to.be.null;
             expect(res).to.have.status(200);
-            expect(res.body).to.be.an('object').to.have.any.keys('status');
-            expect(res.body.status).to.be.an('boolean');
+            expect(res.body).to.be.an('boolean');
             done()
           })
       })

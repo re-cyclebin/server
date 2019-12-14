@@ -93,41 +93,6 @@ describe('Testing for History trashcan up', _ => {
       })
     })
     describe('error process create History', _ => {
-      // it('should send an object (msg, errors) with 400 status code because missing height', done => {
-      //   const noHeight = { ...newHistory };
-      //   delete noHeight.height;
-      //   chai
-      //     .request(app)
-      //     .post(link+initialTrashId)
-      //     .set('token', initialTokenPull)
-      //     .send(noHeight)
-      //     .end((err, res) => {
-      //       expect(err).to.be.null;
-      //       expect(res).to.have.status(400);
-      //       expect(res.body).to.be.an('object').to.have.any.keys('msg', 'errors');
-      //       expect(res.body.msg).to.be.a('string');
-      //       expect(res.body.msg).to.equal('Validation Error');
-      //       done()
-      //     })
-      // })
-      // it('should send an object ( msg, errors) with 400 status code because missing weight', done => {
-      //   const noWeight = { ...newHistory };
-      //   delete noWeight.weight;
-      //   chai
-      //     .request(app)
-      //     .post(link+initialTrashId)
-      //     .set('token', initialTokenPull)
-      //     .send(noWeight)
-      //     .end((err, res) => {
-      //       expect(err).to.be.null;
-      //       expect(res).to.have.status(400);
-      //       expect(res.body).to.be.an('object').to.have.any.keys('msg', 'errors');
-      //       expect(res.body.msg).to.be.a('string');
-      //       expect(res.body.msg).to.equal('Validation Error');
-      //       expect(res.body.errors).to.be.an('array').that.includes('weight is required');
-      //       done()
-      //     })
-      // })
       it('should send an object (msg) with 403 status code because Do not have access', done => {
         chai
           .request(app)
@@ -169,38 +134,6 @@ describe('Testing for History trashcan up', _ => {
             done()
           })
       })
-      // it('should send an object (msg) with 400 status code because wrong type data of height', done => {
-      //   const typeString = { height: 'fwfwef', weight: 40 };
-      //   chai
-      //     .request(app)
-      //     .post(link+initialTrashId)
-      //     .set('token', initialTokenPull)
-      //     .send(typeString)
-      //     .end((err, res) => {
-      //       expect(err).to.be.null;
-      //       expect(res).to.have.status(400);
-      //       expect(res.body).to.be.an('object').to.have.any.keys('msg');
-      //       expect(res.body.msg).to.be.a('string');
-      //       expect(res.body.msg).to.equal('Validation Error')
-      //       done()
-      //     })
-      // })
-      // it('should send an object (msg) with 400 status code because worng type data of weight', done => {
-      //   const typeStirngWeight = { height: 120, weight: 'fwfweffw' };
-      //   chai
-      //     .request(app)
-      //     .post(link+initialTrashId)
-      //     .set('token', initialTokenPull)
-      //     .send(typeStirngWeight)
-      //     .end((err, res) => {
-      //       expect(err).to.be.null;
-      //       expect(res).to.have.status(400);
-      //       expect(res.body).to.be.an('object').to.have.any.keys('msg');
-      //       expect(res.body.msg).to.be.a('string');
-      //       expect(res.body.msg).to.equal('Validation Error')
-      //       done()
-      //     })
-      // })
     })
   })
 

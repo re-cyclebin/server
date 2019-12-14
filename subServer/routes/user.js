@@ -10,7 +10,7 @@ Route.post('/signup', signup);
 
 Route.get('/usersignin', authentication, getSignInUser);
 Route.patch('/reward', authentication, changeRewards);
-Route.patch('/getpoint/:id', authentication, authorUser, userGetPoint);
+Route.patch('/getpoint', authentication, authorUser, userGetPoint);
 
 Route.get('/hisuser', authentication, authorUser, getAllUserHistory);
 Route.get('/hisuser/admin', authentication, authorAdmin, getAllHistoryGlobal);

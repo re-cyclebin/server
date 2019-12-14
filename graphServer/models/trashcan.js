@@ -45,7 +45,7 @@ module.exports = {
     Mutation: {
       makeTrash: async (parent, args) => {
         const { token, longitude, latitude } = args;
-        try { const trash = await createNewTrashCan({ longitude, latitude, token }); return trash }
+        try { return await createNewTrashCan({ longitude, latitude, token }) }
         catch(err) { throw new Error(err.response.data.msg) }
       },
       updateTrashLocation: async (parent, args) => {

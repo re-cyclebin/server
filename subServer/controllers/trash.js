@@ -1,4 +1,5 @@
-const { Trash, User } = require('../models')
+const { Trash, User } = require('../models'),
+  { redis } = require('../cache')
 
 module.exports = {
   createTrash ( req, res, next ) {
@@ -47,6 +48,7 @@ module.exports = {
   updateTrashPushUser ( req, res, next ) {
     const { height, weight } = req.body,
       numHeight = 100.8 - height
+      console.log(height, weight)
     if(!height || !weight) next({ status: 400, msg: 'missing height/weight value' })
     else {
       if(numHeight <= 90) {
@@ -60,12 +62,16 @@ module.exports = {
       }
     }
   },
-  getStatusTrash ( req, res, next ) {
-    Trash.findById(req.params.id)
-      .then(trash => {
-        //create redis
-        res.status(200).json({ status: trash.status })
-      })
-      .catch(next)
+  async getStatusTrash ( req, res, next ) {
+    const getTrashIdStatus = await redis.get(`StatusTrash:${req.params.id}`)
+    if(getTrashIdStatus) res.status(200).json(JSON.parse(getTrashIdStatus))
+    else {
+      Trash.findById(req.params.id)
+        .then(trash => {
+          // await redis.set(`StatusTrash:${req.params.id}`, JSON.stringify(trash.status))
+          res.status(200).json(trash.status)
+        })
+        .catch(next)
+    }
   }
 }

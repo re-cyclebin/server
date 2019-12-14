@@ -606,11 +606,10 @@ describe('Testing for User Routes', _ => {
      it('should send an object user with 200 status code', done => {
        chai
          .request(app)
-         .patch(link+`/${initialTrash._id}`)
+         .patch(link)
          .set('token', initialToken)
          .send(newPoint)
          .end((err, res) => {
-           console.log(res.body)
            expect(err).to.be.null;
            expect(res).to.have.status(200);
            expect(res.body).to.be.an('object').to.have.any.keys('user', 'UserHis');
@@ -632,7 +631,7 @@ describe('Testing for User Routes', _ => {
        const wrongType = { point: '12n' }
        chai
          .request(app)
-         .patch(link+`/${initialTrash._id}`)
+         .patch(link)
          .set('token', initialToken)
          .send(wrongType)
          .end((err, res) => {
@@ -647,7 +646,7 @@ describe('Testing for User Routes', _ => {
      it('should send an object msg with 403 status code because missing token', done => {
        chai
          .request(app)
-         .patch(link+`/${initialTrash._id}`)
+         .patch(link)
          .send(newPoint)
          .end((err, res) => {
            expect(err).to.be.null;
@@ -661,7 +660,7 @@ describe('Testing for User Routes', _ => {
      it('should send an object msg with 403 status code because invalid token', done => {
        chai
          .request(app)
-         .patch(link+`/${initialTrash._id}`)
+         .patch(link)
          .send(newPoint)
          .set('token', falsetoken)
          .end((err, res) => {
@@ -676,7 +675,7 @@ describe('Testing for User Routes', _ => {
      it('should send an object msg with 403 status code because Do not have access', done => {
        chai
          .request(app)
-         .patch(link+`/${initialTrash._id}`)
+         .patch(link)
          .send(newPoint)
          .set('token', initialTokenPull)
          .end((err, res) => {
