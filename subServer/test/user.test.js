@@ -1,7 +1,7 @@
 const chai = require('chai'),
   chaiHttp = require('chai-http'),
   app = require('../app'),
-  { User } = require('../models'),
+  { User, Trash } = require('../models'),
   { jwt } = require('../helpers'),
   { signToken } = jwt
 
@@ -11,6 +11,8 @@ const expect = chai.expect;
 let initialId,
   initialToken,
   initialUser,
+  initialTrash,
+  initialTokenPull,
   falsetoken = 'fewniwpfnafwamfksmkfnskflnaskfc2'
 
 before(done => {
@@ -25,6 +27,14 @@ before(done => {
       initialId = user._id;
       const token = signToken({ id: user._id, username: user.username, password: user.password })
       initialToken = token
+      return Trash.create({location: { longitude: 241, latitude: 414 }})
+    })
+    .then(trash => {
+      initialTrash = trash;
+      return User.create({ username: 'budi123', password: 'Budinfe', email: 'fewfewfew@gmail.com', role: 'puller' })
+    })
+    .then(pul => {
+      initialTokenPull = signToken({ id: pul._id, username: pul.username, email: pul.email })
       done()
     })
     .catch(console.log)
@@ -225,6 +235,23 @@ describe('Testing for User Routes', _ => {
             expect(res.body.errors).to.be.an('array').that.includes('password min 1 capital case');
             expect(res.body.msg).to.be.a('string');
             expect(res.body.msg).to.equal('Validation Error');
+            done()
+          })
+      })
+      it('should send an object (msg, errors) with 400 status code because duplicate username', done => {
+        const dupName = { ...newUser };
+        dupName.email = 'aditya@gmail.com';
+        chai
+          .request(app)
+          .post(link)
+          .send(dupName)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(400);
+            expect(res.body).to.be.an('object').to.have.any.keys('msg', 'errors');
+            expect(res.body.msg).to.be.a('string');
+            expect(res.body.msg).to.equal('Validation Error');
+            expect(res.body.errors).to.be.an('array').that.includes('duplicate username detected');
             done()
           })
       })
@@ -571,5 +598,96 @@ describe('Testing for User Routes', _ => {
         })
     })
   })
+ })
+ describe('PATCH /getpoint/:id point', _ => {
+   let link = '/getpoint';
+   const newPoint = { point: 10 };
+   describe('success process user get point', _ => {
+     it('should send an object user with 200 status code', done => {
+       chai
+         .request(app)
+         .patch(link+`/${initialTrash._id}`)
+         .set('token', initialToken)
+         .send(newPoint)
+         .end((err, res) => {
+           console.log(res.body)
+           expect(err).to.be.null;
+           expect(res).to.have.status(200);
+           expect(res.body).to.be.an('object').to.have.any.keys('user', 'UserHis');
+           expect(res.body.UserHis).to.be.an('object').to.have.any.keys('point', 'UserId');
+           expect(res.body.UserHis.point).to.be.a('number');
+           expect(res.body.UserHis.UserId).to.be.a('string');
+           expect(res.body.UserHis.UserId).to.equal(res.body.user._id);
+           expect(res.body.user).to.be.an('object').to.have.any.keys('username', 'email', 'point');
+           expect(res.body.user.username).to.be.a('string');
+           expect(res.body.user.email).to.be.a('string');
+           expect(res.body.user.point).to.be.a('number');
+           expect(res.body.user.point).to.equal(Number(initialUser.point) + Number(newPoint.point));
+           done()
+         })
+     })
+   })
+   describe('error process when user get a point', _ => {
+     it('should send an object msg with 500 status code because wrong type', done => {
+       const wrongType = { point: '12n' }
+       chai
+         .request(app)
+         .patch(link+`/${initialTrash._id}`)
+         .set('token', initialToken)
+         .send(wrongType)
+         .end((err, res) => {
+           expect(err).to.be.null;
+           expect(res).to.have.status(500);
+           expect(res.body).to.be.an('object').to.have.any.keys('msg');
+           expect(res.body.msg).to.be.a('string');
+           expect(res.body.msg).to.equal('Internal Server Error');
+           done()
+         })
+     })
+     it('should send an object msg with 403 status code because missing token', done => {
+       chai
+         .request(app)
+         .patch(link+`/${initialTrash._id}`)
+         .send(newPoint)
+         .end((err, res) => {
+           expect(err).to.be.null;
+           expect(res).to.have.status(403);
+           expect(res.body).to.be.an('object').to.have.any.keys('msg');
+           expect(res.body.msg).to.be.a('string');
+           expect(res.body.msg).to.equal('Authentication Error');
+           done()
+         })
+     })
+     it('should send an object msg with 403 status code because invalid token', done => {
+       chai
+         .request(app)
+         .patch(link+`/${initialTrash._id}`)
+         .send(newPoint)
+         .set('token', falsetoken)
+         .end((err, res) => {
+           expect(err).to.be.null;
+           expect(res).to.have.status(403);
+           expect(res.body).to.be.an('object').to.have.any.keys('msg');
+           expect(res.body.msg).to.be.a('string');
+           expect(res.body.msg).to.equal('Invalid Token');
+           done()
+         })
+     })
+     it('should send an object msg with 403 status code because Do not have access', done => {
+       chai
+         .request(app)
+         .patch(link+`/${initialTrash._id}`)
+         .send(newPoint)
+         .set('token', initialTokenPull)
+         .end((err, res) => {
+           expect(err).to.be.null;
+           expect(res).to.have.status(403);
+           expect(res.body).to.be.an('object').to.have.any.keys('msg')
+           expect(res.body.msg).to.be.a('string');
+           expect(res.body.msg).to.equal('Do not have access');
+           done();
+         })
+     })
+   })
  })
 })

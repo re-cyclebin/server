@@ -1,4 +1,4 @@
-const { User } = require('../models'),
+const { User, UserHistory } = require('../models'),
   { jwt } = require('../helpers'),
   { decodeToken } = jwt
 
@@ -21,7 +21,7 @@ module.exports = {
       User.findById(req.loggedUser.id)
         .then(user => {
           if(user.role === 'admin') next()
-          else next({ status:403, msg: 'Authorization Error' })
+          else next({ status:403, msg: 'Do not have access' })
         })
         .catch(next)
     } catch (err) { next(err) }
@@ -31,8 +31,26 @@ module.exports = {
       User.findById(req.loggedUser.id)
         .then(user => {
           if(user.role === 'puller') next();
-          else next({ status: 403, msg: 'Authorization Error' })
+          else next({ status: 403, msg: 'Do not have access' })
         })
     } catch (err) { next(err) }
+  },
+  authorUser ( req, res, next ) {
+    try {
+      User.findById(req.loggedUser.id)
+        .then(user => {
+          if(user.role === 'user') next();
+          else next({ status: 403, msg: 'Do not have access' })
+        })
+    } catch (err) { next(err) }
+  },
+  authorDeleteHistory ( req, res, next ) {
+    try {
+      UserHistory.findById(req.params.id)
+        .then(his => {
+          if(his.UserId == req.loggedUser.id) next()
+          else next({ status: 403, msg: 'Authorization Error' })
+        })
+    } catch(err) { next(err) }
   }
 }

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=testing mocha --exit",
+    "test": "NODE_ENV=testing nyc --reporter=text mocha --exit",
     "dev": "NODE_ENV=development nodemon app.js"
   },
   "repository": {
@@ -29,6 +29,7 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "nyc": "^14.1.1"
   }
 }

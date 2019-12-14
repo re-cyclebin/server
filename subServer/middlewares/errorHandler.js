@@ -18,7 +18,7 @@ module.exports = (err, req, res, next) => {
       res.status(403).json({msg: err.message})
     }
   } else if(err.kind == 'ObjectId') {
-    res.status(404).json({ msg: 'searching not found'})
+    res.status(404).json({ msg: 'Your search was not found'})
   }
   else {
     res.status(status).json({ msg })

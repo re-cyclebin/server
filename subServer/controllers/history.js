@@ -1,10 +1,16 @@
-const { History } = require('../models');
+const { History, Trash } = require('../models');
 
 module.exports = {
   createHistory ( req, res, next ) {
-    const { height, weight } = req.body;
-    History.create({ height, weight, Puller: req.loggedUser.id, TrashId: req.params.id })
-      .then(history => res.status(201).json({ history }))
+    Trash.findById(req.params.id)
+      .then(trash => {
+        return History.create({ height: trash.height, weight: trash.weight, Puller: req.loggedUser.id, TrashId: req.params.id })
+      })
+      .then(history => {
+        tempHistory = history;
+        return Trash.findByIdAndUpdate(req.params.id, { height: 0, weight: 0, avaible: true }, { new: true })
+      })
+      .then(trash => res.status(201).json({ trash, history: tempHistory }))
       .catch(next)
   },
   getAllHistories ( req, res, next ) {

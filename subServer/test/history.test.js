@@ -62,10 +62,6 @@ after(done => {
 
 describe('Testing for History trashcan up', _ => {
   describe('POST /history/:id (trashId)', _ => {
-    let newHistory = {
-      height: 50,
-      weight: 25
-    }
     let link = '/history/';
     describe('success process create History', _ => {
       it('should send an object history with 201 status code', done => {
@@ -73,70 +69,76 @@ describe('Testing for History trashcan up', _ => {
           .request(app)
           .post(link+initialTrashId)
           .set('token', initialTokenPull)
-          .send(newHistory)
           .end((err, res) => {
             expect(err).to.be.null;
             expect(res).to.have.status(201);
-            expect(res.body).to.be.an('object').to.have.any.keys('history');
+            expect(res.body).to.be.an('object').to.have.any.keys('history', 'trash');
             expect(res.body.history).to.be.an('object').to.have.any.keys('_id', 'Puller', 'TrashId', 'height', 'weight');
             expect(res.body.history.height).to.be.a('number');
             expect(res.body.history.weight).to.be.a('number');
             expect(res.body.history._id).to.be.a('string');
             expect(res.body.history.TrashId).to.be.a('string');
             expect(res.body.history.Puller).to.be.a('string');
+            expect(res.body.trash).to.be.an('object').to.have.any.keys('_id', 'location', 'height', 'weight');
+            expect(res.body.trash._id).to.be.a('string');
+            expect(res.body.trash.location).to.be.an('object').to.have.any.keys('latitude', 'longitude');
+            expect(res.body.trash.location.longitude).to.be.a('string');
+            expect(res.body.trash.location.latitude).to.be.a('string');
+            expect(res.body.trash.weight).to.be.a('number');
+            expect(res.body.trash.weight).to.equal(0);
+            expect(res.body.trash.height).to.be.a('number');
+            expect(res.body.trash.height).to.equal(0);
             done()
           })
       })
     })
     describe('error process create History', _ => {
-      it('should send an object (msg, errors) with 400 status code because missing height', done => {
-        const noHeight = { ...newHistory };
-        delete noHeight.height;
-        chai
-          .request(app)
-          .post(link+initialTrashId)
-          .set('token', initialTokenPull)
-          .send(noHeight)
-          .end((err, res) => {
-            expect(err).to.be.null;
-            expect(res).to.have.status(400);
-            expect(res.body).to.be.an('object').to.have.any.keys('msg', 'errors');
-            expect(res.body.msg).to.be.a('string');
-            expect(res.body.msg).to.equal('Validation Error');
-            expect(res.body.errors).to.be.an('array').that.includes('height is required');
-            done()
-          })
-      })
-      it('should send an object ( msg, errors) with 400 status code because missing weight', done => {
-        const noWeight = { ...newHistory };
-        delete noWeight.weight;
-        chai
-          .request(app)
-          .post(link+initialTrashId)
-          .set('token', initialTokenPull)
-          .send(noWeight)
-          .end((err, res) => {
-            expect(err).to.be.null;
-            expect(res).to.have.status(400);
-            expect(res.body).to.be.an('object').to.have.any.keys('msg', 'errors');
-            expect(res.body.msg).to.be.a('string');
-            expect(res.body.msg).to.equal('Validation Error');
-            expect(res.body.errors).to.be.an('array').that.includes('weight is required');
-            done()
-          })
-      })
-      it('should send an object (msg) with 403 status code because authorization error', done => {
+      // it('should send an object (msg, errors) with 400 status code because missing height', done => {
+      //   const noHeight = { ...newHistory };
+      //   delete noHeight.height;
+      //   chai
+      //     .request(app)
+      //     .post(link+initialTrashId)
+      //     .set('token', initialTokenPull)
+      //     .send(noHeight)
+      //     .end((err, res) => {
+      //       expect(err).to.be.null;
+      //       expect(res).to.have.status(400);
+      //       expect(res.body).to.be.an('object').to.have.any.keys('msg', 'errors');
+      //       expect(res.body.msg).to.be.a('string');
+      //       expect(res.body.msg).to.equal('Validation Error');
+      //       done()
+      //     })
+      // })
+      // it('should send an object ( msg, errors) with 400 status code because missing weight', done => {
+      //   const noWeight = { ...newHistory };
+      //   delete noWeight.weight;
+      //   chai
+      //     .request(app)
+      //     .post(link+initialTrashId)
+      //     .set('token', initialTokenPull)
+      //     .send(noWeight)
+      //     .end((err, res) => {
+      //       expect(err).to.be.null;
+      //       expect(res).to.have.status(400);
+      //       expect(res.body).to.be.an('object').to.have.any.keys('msg', 'errors');
+      //       expect(res.body.msg).to.be.a('string');
+      //       expect(res.body.msg).to.equal('Validation Error');
+      //       expect(res.body.errors).to.be.an('array').that.includes('weight is required');
+      //       done()
+      //     })
+      // })
+      it('should send an object (msg) with 403 status code because Do not have access', done => {
         chai
           .request(app)
           .post(link+initialTrashId)
           .set('token', initialTokenUser)
-          .send(newHistory)
           .end((err,res) => {
             expect(err).to.be.null;
             expect(res).to.have.status(403);
             expect(res.body).to.be.an('object').to.have.any.keys('msg');
             expect(res.body.msg).to.be.a('string');
-            expect(res.body.msg).to.equal('Authorization Error');
+            expect(res.body.msg).to.equal('Do not have access');
             done()
           })
       })
@@ -145,7 +147,6 @@ describe('Testing for History trashcan up', _ => {
           .request(app)
           .post(link+initialTrashId)
           .set('token', falseToken)
-          .send(newHistory)
           .end((err, res) => {
             expect(err).to.be.null;
             expect(res).to.have.status(403);
@@ -159,7 +160,6 @@ describe('Testing for History trashcan up', _ => {
         chai  
           .request(app)
           .post(link+initialTrashId)
-          .send(newHistory)
           .end((err, res) => {
             expect(err).to.be.null;
             expect(res).to.have.status(403);
@@ -169,38 +169,38 @@ describe('Testing for History trashcan up', _ => {
             done()
           })
       })
-      it('should send an object (msg) with 400 status code because wrong type data of height', done => {
-        const typeString = { height: 'fwfwef', weight: 40 };
-        chai
-          .request(app)
-          .post(link+initialTrashId)
-          .set('token', initialTokenPull)
-          .send(typeString)
-          .end((err, res) => {
-            expect(err).to.be.null;
-            expect(res).to.have.status(400);
-            expect(res.body).to.be.an('object').to.have.any.keys('msg');
-            expect(res.body.msg).to.be.a('string');
-            expect(res.body.msg).to.equal('Validation Error')
-            done()
-          })
-      })
-      it('should send an object (msg) with 400 status code because worng type data of weight', done => {
-        const typeStirngWeight = { height: 120, weight: 'fwfweffw' };
-        chai
-          .request(app)
-          .post(link+initialTrashId)
-          .set('token', initialTokenPull)
-          .send(typeStirngWeight)
-          .end((err, res) => {
-            expect(err).to.be.null;
-            expect(res).to.have.status(400);
-            expect(res.body).to.be.an('object').to.have.any.keys('msg');
-            expect(res.body.msg).to.be.a('string');
-            expect(res.body.msg).to.equal('Validation Error')
-            done()
-          })
-      })
+      // it('should send an object (msg) with 400 status code because wrong type data of height', done => {
+      //   const typeString = { height: 'fwfwef', weight: 40 };
+      //   chai
+      //     .request(app)
+      //     .post(link+initialTrashId)
+      //     .set('token', initialTokenPull)
+      //     .send(typeString)
+      //     .end((err, res) => {
+      //       expect(err).to.be.null;
+      //       expect(res).to.have.status(400);
+      //       expect(res.body).to.be.an('object').to.have.any.keys('msg');
+      //       expect(res.body.msg).to.be.a('string');
+      //       expect(res.body.msg).to.equal('Validation Error')
+      //       done()
+      //     })
+      // })
+      // it('should send an object (msg) with 400 status code because worng type data of weight', done => {
+      //   const typeStirngWeight = { height: 120, weight: 'fwfweffw' };
+      //   chai
+      //     .request(app)
+      //     .post(link+initialTrashId)
+      //     .set('token', initialTokenPull)
+      //     .send(typeStirngWeight)
+      //     .end((err, res) => {
+      //       expect(err).to.be.null;
+      //       expect(res).to.have.status(400);
+      //       expect(res.body).to.be.an('object').to.have.any.keys('msg');
+      //       expect(res.body.msg).to.be.a('string');
+      //       expect(res.body.msg).to.equal('Validation Error')
+      //       done()
+      //     })
+      // })
     })
   })
 
@@ -261,20 +261,6 @@ describe('Testing for History trashcan up', _ => {
             done()
           })
       })
-      // it('should send an object msg with 500 status code because Server Error', done => {
-      //   // initialHistory = null;
-      //   chai
-      //     .request(app)
-      //     .get(link)
-      //     .set('token', initialTokenUser)
-      //     .end((err,res) => {
-      //       expect(err).to.be.null;
-      //       expect(res).to.have.status(500);
-      //       expect(res.body).to.be.an('object').to.have.any.keys('msg');
-      //       expect(res.body.msg).to.be.a('string');
-      //       expect(res.body.msg).to.equal('Internal Server Error')
-      //     })
-      // })
     })
   })
 
@@ -324,7 +310,7 @@ describe('Testing for History trashcan up', _ => {
             done();
           })
       })
-      it('should send an object msg with 403 status code because authorization error', done => {
+      it('should send an object msg with 403 status code because Do not have access', done => {
         chai
           .request(app)
           .delete(link+initialHistory)
@@ -334,7 +320,7 @@ describe('Testing for History trashcan up', _ => {
             expect(res).to.have.status(403);
             expect(res.body).to.be.an('object').to.have.any.keys('msg');
             expect(res.body.msg).to.be.a('string');
-            expect(res.body.msg).to.equal('Authorization Error');
+            expect(res.body.msg).to.equal('Do not have access');
             done();
           })
       })
@@ -349,7 +335,7 @@ describe('Testing for History trashcan up', _ => {
             expect(res).to.have.status(404);
             expect(res.body).to.be.an('object').to.have.any.keys('msg');
             expect(res.body.msg).to.be.a('string');
-            expect(res.body.msg).to.equal('searching not found');
+            expect(res.body.msg).to.equal('Your search was not found');
             done();
           })
       })

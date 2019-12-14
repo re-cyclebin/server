@@ -13,7 +13,8 @@ const { model, Schema } = require('mongoose'),
     },
     height: Number,
     weight: Number,
-    avaible: Boolean
+    avaible: Boolean,
+    status: Boolean
   }, { timestamps: true })
 
 
@@ -21,6 +22,7 @@ TrashSchema.pre('save', function(next) {
   this.height = 0;
   this.weight = 0;
   this.avaible = true;
+  this.status = false
   next()
 })
 

@@ -1,4 +1,4 @@
-const { User } = require('../models'),
+const { User, UserHistory } = require('../models'),
   { jwt, hash } = require('../helpers'),
   { signToken } = jwt,
   { comparePassword } = hash,
@@ -45,6 +45,23 @@ module.exports = {
         return User.findByIdAndUpdate(req.loggedUser.id, { point: Number(result), reward: Number(getUser.reward) + Number(getReward) }, { new: true })
       })
       .then(user => res.status(200).json({ user }))
+      .catch(next)
+  },
+  userGetPoint ( req, res, next ) {
+    const { point } = req.body;
+    let tempUser
+    User.findById(req.loggedUser.id)
+      .then(userb => {
+        let newPoint = userb.point + point;
+        return User.findByIdAndUpdate(req.loggedUser.id, { point: newPoint }, { new: true })
+      })
+      .then(user => {
+        tempUser = user;
+        return UserHistory.create({ UserId: req.loggedUser.id, point })
+      })
+      .then(hisUser => {
+        res.status(200).json({ user: tempUser, UserHis: hisUser })
+      })
       .catch(next)
   }
 }

@@ -1,13 +1,19 @@
 const Route = require('express').Router(),
   { auth } = require('../middlewares'),
-  { authentication, authorAdmin, authorPuller } = auth,
+  { authentication, authorAdmin, authorUser } = auth,
   { trashController } = require('../controllers'),
-  { createTrash, updateTrashAdmin, updateTrashPuller, deleteTrashAdmin, getAllTrash } = trashController;
+  { createTrash, updateTrashAdmin, updateTrashPushUser, deleteTrashAdmin, getAllTrash, updateStatusTrash, getStatusTrash } = trashController;
+
 
 Route.get('/', authentication, getAllTrash);
 Route.post('/admin', authentication, authorAdmin, createTrash);
 Route.patch('/admin/:id', authentication, authorAdmin, updateTrashAdmin);
 Route.delete('/admin/:id', authentication, authorAdmin, deleteTrashAdmin);
-Route.patch('/pull/:id', authentication, authorPuller, updateTrashPuller);
+Route.patch('/status/:id', authentication, authorUser, updateStatusTrash);
+
+// IOT getting status
+Route.post('/push/:id', updateTrashPushUser);
+Route.get('/iotstatus/:id', getStatusTrash);
+
 
 module.exports = Route;

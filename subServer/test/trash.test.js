@@ -10,8 +10,10 @@ const expect = chai.expect;
 
 let initialTokenAdmin='',
   initialToken='',
+  initialUser = '',
   initialTokenPull='',
   initialTrash='',
+  initialTrash2 = '',
   falseToken = 'fdsafewfupf2jd2idwds'
 
 before(done => {
@@ -29,6 +31,7 @@ before(done => {
       return User.create(dummyUser)
     })
     .then(user => {
+      initialUser = user;
       const token = signToken({ id: user._id, username: user.username, password: user.password, email: user.email })
       initialToken = token;
       const dummyUserPull = { username: 'pulleruser', email: 'pullerUser@gmail.com', password: 'PullerIsreal', role: 'puller' }
@@ -37,6 +40,11 @@ before(done => {
     .then(userPuller => {
       const tokenPull = signToken({ id: userPuller._id, username: userPuller.username, email: userPuller.email })
       initialTokenPull = tokenPull;
+      return Trash.create({ location : { longitude: 20, latitude: 50 } })
+      done()
+    })
+    .then(trash2 => {
+      initialTrash2 = trash2;
       done()
     })
     .catch(console.log)
@@ -81,6 +89,7 @@ describe('Testing for Trash Can Routes', _ => {
             expect(res.body.trash.location.longitude).to.be.a('string');
             expect(res.body.trash.location.latitude).to.be.a('string');
             expect(res.body.trash.height).to.be.a('number');
+            expect(res.body.trash.height).to.equal(0);
             expect(res.body.trash.weight).to.be.a('number');
             expect(res.body.trash.avaible).to.be.an('boolean');
             done()
@@ -135,7 +144,7 @@ describe('Testing for Trash Can Routes', _ => {
             expect(res).to.have.status(403);
             expect(res.body).to.be.an('object').to.have.any.keys('msg');
             expect(res.body.msg).to.be.a('string');
-            expect(res.body.msg).to.equal('Authorization Error');
+            expect(res.body.msg).to.equal('Do not have access');
             done()
           })
       })
@@ -224,15 +233,15 @@ describe('Testing for Trash Can Routes', _ => {
       })
     })
   })
-  describe('PATCH /trashcan/pull/:id (puller update)', _ => {
-    const update = { height: 50, weight: 40 }
-    link = `/trashcan/pull`
-    describe('success process patch trashcan', _ => {
+  describe('POST /trashcan/push/:id (IOT update)', _ => {
+    const update = { height: 50.2, weight: 40 }
+    link = `/trashcan/push`
+    describe('success process post trashcan', _ => {
       it('should send an object trash with 200 status code', done => {
         chai
           .request(app)
-          .patch(link+`/${initialTrash._id}`)
-          .set('token', initialTokenPull)
+          .post(link+`/${initialTrash._id}`)
+          .set('token', initialToken)
           .send(update)
           .end((err, res) => {
             expect(err).to.be.null;
@@ -242,6 +251,7 @@ describe('Testing for Trash Can Routes', _ => {
             expect(res.body.trash.avaible).to.be.an('boolean');
             expect(res.body.trash.height).to.be.a('number');
             expect(res.body.trash.weight).to.be.a('number');
+            expect(res.body.trash.height).to.equal(100.8-Number(update.height));
             expect(res.body.trash.location).to.be.an('object').to.have.any.keys('latitude', 'longitude');
             expect(res.body.trash.location.longitude).to.be.a('string');
             expect(res.body.trash.location.latitude).to.be.a('string');
@@ -249,15 +259,35 @@ describe('Testing for Trash Can Routes', _ => {
             done()
           })
       })
+      it('should send an object with 200 status code when max height', done => {
+        let newUpdate = { height: 5, weight: 100 }
+        chai
+          .request(app)
+          .post(link+`/${initialTrash._id}`)
+          .set('token', initialToken)
+          .send(newUpdate)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(200);
+            expect(res.body).to.be.an('object').to.have.any.keys('trash')
+            expect(res.body.trash).to.be.an('object').to.have.any.keys('_id', 'height', 'weight', 'avaible');
+            expect(res.body.trash._id).to.be.a('string');
+            expect(res.body.trash.height).to.be.a('number');
+            expect(res.body.trash.weight).to.be.a('number');
+            expect(res.body.trash.avaible).to.be.a('boolean');
+            expect(res.body.trash.avaible).not.to.equal(initialTrash.avaible);
+            done()
+          })
+      })
     })
-    describe('error process patch trascan', _ => {
+    describe('error process post trascan', _ => {
       it('should send an object msg with 400 status code because missing height', done => {
         const noHeight = { ...update };
         delete noHeight.height;
         chai
           .request(app)
-          .patch(link+`/${initialTrash._id}`)
-          .set('token', initialTokenPull)
+          .post(link+`/${initialTrash._id}`)
+          .set('token', initialToken)
           .send(noHeight)
           .end((err, res) => {
             expect(err).to.be.null;
@@ -273,8 +303,8 @@ describe('Testing for Trash Can Routes', _ => {
         delete noWeight.weight;
         chai
           .request(app)
-          .patch(link+`/${initialTrash._id}`)
-          .set('token', initialTokenPull)
+          .post(link+`/${initialTrash._id}`)
+          .set('token', initialToken)
           .send(noWeight)
           .end((err, res) => {
             expect(err).to.be.null;
@@ -285,63 +315,63 @@ describe('Testing for Trash Can Routes', _ => {
             done()
           })
       })
-      it('should send an object msg with 403 status code because authorization error', done => {
-        chai
-          .request(app)
-          .patch(link+`/${initialTrash._id}`)
-          .set('token', initialToken)
-          .send(update)
-          .end((err, res) => {
-            expect(err).to.be.null;
-            expect(res).to.have.status(403);
-            expect(res.body).to.be.an('object').to.have.any.keys('msg');
-            expect(res.body.msg).to.be.a('string');
-            expect(res.body.msg).to.equal('Authorization Error');
-            done()
-          })
-      })
-      it('should send an object msg with 403 status code because Invalid Token', done => {
-        chai
-          .request(app)
-          .patch(link+`/${initialTrash._id}`)
-          .set('token', falseToken)
-          .send(update)
-          .end((err, res) => {
-            expect(err).to.be.null;
-            expect(res).to.have.status(403);
-            expect(res.body).to.be.an('object').to.have.any.keys('msg');
-            expect(res.body.msg).to.be.a('string');
-            expect(res.body.msg).to.equal('Invalid Token');
-            done();
-          })
-      })
-      it('should send an object msg with 403 status code because missing token', done => {
-        chai
-          .request(app)
-          .patch(link+`/${initialTrash._id}`)
-          .send(update)
-          .end((err, res) => {
-            expect(err).to.be.null;
-            expect(res).to.have.status(403);
-            expect(res.body).to.be.an('object').to.have.any.keys('msg');
-            expect(res.body.msg).to.be.a('string');
-            expect(res.body.msg).to.equal('Authentication Error');
-            done()
-          })
-      })
+      // it('should send an object msg with 403 status code because Do not have access', done => {
+      //   chai
+      //     .request(app)
+      //     .post(link+`/${initialTrash._id}`)
+      //     .set('token', initialTokenPull)
+      //     .send(update)
+      //     .end((err, res) => {
+      //       expect(err).to.be.null;
+      //       expect(res).to.have.status(403);
+      //       expect(res.body).to.be.an('object').to.have.any.keys('msg');
+      //       expect(res.body.msg).to.be.a('string');
+      //       expect(res.body.msg).to.equal('Do not have access');
+      //       done()
+      //     })
+      // })
+      // it('should send an object msg with 403 status code because Invalid Token', done => {
+      //   chai
+      //     .request(app)
+      //     .post(link+`/${initialTrash._id}`)
+      //     .set('token', falseToken)
+      //     .send(update)
+      //     .end((err, res) => {
+      //       expect(err).to.be.null;
+      //       expect(res).to.have.status(403);
+      //       expect(res.body).to.be.an('object').to.have.any.keys('msg');
+      //       expect(res.body.msg).to.be.a('string');
+      //       expect(res.body.msg).to.equal('Invalid Token');
+      //       done();
+      //     })
+      // })
+      // it('should send an object msg with 403 status code because missing token', done => {
+      //   chai
+      //     .request(app)
+      //     .post(link+`/${initialTrash._id}`)
+      //     .send(update)
+      //     .end((err, res) => {
+      //       expect(err).to.be.null;
+      //       expect(res).to.have.status(403);
+      //       expect(res.body).to.be.an('object').to.have.any.keys('msg');
+      //       expect(res.body.msg).to.be.a('string');
+      //       expect(res.body.msg).to.equal('Authentication Error');
+      //       done()
+      //     })
+      // })
       it('should send an object msg with 404 status code because invalid trashcan id', done => {
-        let falseLink = `/trashcan/pull/jeiofewjfiqwifjq12`;
+        let falseLink = `/trashcan/push/jeiofewjfiqwifjq12`;
         chai
           .request(app)
-          .patch(falseLink)
-          .set('token', initialTokenPull)
+          .post(falseLink)
+          .set('token', initialToken)
           .send(update)
           .end((err, res) => {
             expect(err).to.be.null;
             expect(res).to.have.status(404);
             expect(res.body).to.be.an('object').to.have.any.keys('msg');
             expect(res.body.msg).to.be.a('string');
-            expect(res.body.msg).to.equal('searching not found')
+            expect(res.body.msg).to.equal('Your search was not found')
             done()
           })
       })
@@ -350,10 +380,8 @@ describe('Testing for Trash Can Routes', _ => {
 
   describe('PATCH /trashcan/admin/:id', _ => {
     const newLocation = {
-      location: {
-        latitude: 1200,
-        longitude: 1500
-      }
+      latitude: 1200.8,
+      longitude: 1500
     }
     let link = `/trashcan/admin`
     describe('success process change location trashcan', _ => {
@@ -371,6 +399,8 @@ describe('Testing for Trash Can Routes', _ => {
             expect(res.body.trash.location).to.be.an('object').to.have.any.keys('longitude', 'latitude');
             expect(res.body.trash.location.longitude).to.be.a('string');
             expect(res.body.trash.location.latitude).to.be.a('string');
+            expect(res.body.trash.location.longitude).not.to.equal(initialTrash.location.longitude);
+            expect(res.body.trash.location.latitude).not.to.equal(initialTrash.location.latitude);
             expect(res.body.trash.height).to.be.a('number');
             expect(res.body.trash.weight).to.be.a('number');
             expect(res.body.trash._id).to.be.a('string');
@@ -381,7 +411,7 @@ describe('Testing for Trash Can Routes', _ => {
     describe('error process change location trashcan', _ => {
       it('should send an object msg with 400 status code becuase missing latitude', done => {
         const missLatitude = { ...newLocation };
-        delete missLatitude.location.latitude;
+        delete missLatitude.latitude;
         chai
           .request(app)
           .patch(link+`/${initialTrash._id}`)
@@ -398,7 +428,7 @@ describe('Testing for Trash Can Routes', _ => {
       })
       it('should send an object msg with 400 status code because missing longitude', done => {
         const missLongitude = { ...newLocation };
-        delete missLongitude.location.longitude;
+        delete missLongitude.longitude;
         chai
           .request(app)
           .patch(link+`/${initialTrash._id}`)
@@ -413,7 +443,7 @@ describe('Testing for Trash Can Routes', _ => {
             done();
           })
       })
-      it('should send an object msg with 403 status code because authorization error', done => {
+      it('should send an object msg with 403 status code because Do not have access', done => {
         chai
           .request(app)
           .patch(link+`/${initialTrash._id}`)
@@ -424,7 +454,7 @@ describe('Testing for Trash Can Routes', _ => {
             expect(res).to.have.status(403);
             expect(res.body).to.be.an('object').to.have.any.keys('msg');
             expect(res.body.msg).to.be.a('string');
-            expect(res.body.msg).to.equal('Authorization Error');
+            expect(res.body.msg).to.equal('Do not have access');
             done()
           })
       })
@@ -459,7 +489,7 @@ describe('Testing for Trash Can Routes', _ => {
       })
       it('should send an object msg with 404 status code because invalid trashcan id', done => {
         let falseLink = `/trashcan/admin/jeiofewjfiqwifjq12`;
-        let newloc = { location: { longitude: '400', latitude: '500' } }
+        let newloc = { longitude: '400', latitude: '500' }
         chai
           .request(app)
           .patch(falseLink)
@@ -470,7 +500,7 @@ describe('Testing for Trash Can Routes', _ => {
             expect(res).to.have.status(404);
             expect(res.body).to.be.an('object').to.have.any.keys('msg');
             expect(res.body.msg).to.be.a('string');
-            expect(res.body.msg).to.equal('searching not found')
+            expect(res.body.msg).to.equal('Your search was not found')
             done()
           })
       })
@@ -497,7 +527,7 @@ describe('Testing for Trash Can Routes', _ => {
       })
     })
     describe('error process deleting trashcan', _ => {
-      it('should send an object msg with 403 status code because authorization error', done => {
+      it('should send an object msg with 403 status code because Do not have access', done => {
         chai
           .request(app)
           .delete(link+`/${initialTrash._id}`)
@@ -507,7 +537,7 @@ describe('Testing for Trash Can Routes', _ => {
             expect(res).to.have.status(403);
             expect(res.body).to.be.an('object').to.have.any.keys('msg');
             expect(res.body.msg).to.be.a('string');
-            expect(res.body.msg).to.equal('Authorization Error');
+            expect(res.body.msg).to.equal('Do not have access');
             done()
           })
       })
@@ -549,10 +579,114 @@ describe('Testing for Trash Can Routes', _ => {
             expect(res).to.have.status(404);
             expect(res.body).to.be.an('object').to.have.any.keys('msg');
             expect(res.body.msg).to.be.a('string');
-            expect(res.body.msg).to.equal('searching not found')
+            expect(res.body.msg).to.equal('Your search was not found')
             done()
           })
       })
     })
   })
+
+  describe('PATCH /trashcan/status/:id', _ => {
+    let link = '/trashcan/status'
+    describe('success process update status when user request', _ => {
+      it('should send an object (msg, trash) with 200 status code', done => {
+        chai
+          .request(app)
+          .patch(link+`/${initialTrash2._id}`)
+          .set('token', initialToken)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(200);
+            expect(res.body).to.be.an('object').to.have.any.keys('msg', 'trash');
+            expect(res.body.msg).to.be.a('string');
+            expect(res.body.msg).to.equal('update success');
+            expect(res.body.trash).to.be.an('object').to.have.any.keys('height', 'weight', 'status');
+            expect(res.body.trash.height).to.be.a('number');
+            expect(res.body.trash.weight).to.be.a('number');
+            expect(res.body.trash.status).to.be.an('boolean');
+            expect(res.body.trash.status).not.to.equal(initialTrash.status);
+            done()
+          })
+      })
+    })
+    describe('error process update status when user request', _ => {
+      it('should send an object (msg) with 403 status code because invalid token', done => {
+        chai
+          .request(app)
+          .patch(link+`/${initialTrash2._id}`)
+          .set('token', falseToken)
+          .end((err,res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(403);
+            expect(res.body).to.be.an('object').to.have.any.keys('msg');
+            expect(res.body.msg).to.be.a('string');
+            expect(res.body.msg).to.equal('Invalid Token');
+            done()
+          })
+      })
+      it('should send an object (msg) with 404 status code because invalid id', done => {
+        let falseLink = '/trashcan/status/dafsafdafs'
+        chai
+          .request(app)
+          .patch(falseLink)
+          .set('token', initialToken)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(404);
+            expect(res.body).to.be.an('object').to.have.any.keys('msg');
+            expect(res.body.msg).to.be.a('string');
+            expect(res.body.msg).to.equal('Your search was not found');
+            done()
+          })
+      })
+      it('should send an object (msg) with 403 status code because Do not have access', done => {
+        chai
+          .request(app)
+          .patch(link+`/${initialTrash2._id}`)
+          .set('token', initialTokenPull)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(403);
+            expect(res.body).to.be.an('object').to.have.any.keys('msg');
+            expect(res.body.msg).to.be.a('string');
+            expect(res.body.msg).to.equal('Do not have access');
+            done();
+          })
+      })
+    })
+  })
+
+  describe('GET /trashcan/iotstatus/:id IOT get iotstatus', _ => {
+    let link = '/trashcan/iotstatus';
+    describe('success process getting status', _ => {
+      it('should send an object status with 200 status code', done => {
+        chai
+          .request(app)
+          .get(link+`/${initialTrash2._id}`)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(200);
+            expect(res.body).to.be.an('object').to.have.any.keys('status');
+            expect(res.body.status).to.be.an('boolean');
+            done()
+          })
+      })
+    })
+    describe('error process when getting status', _ => {
+      it('should send an object msg 404 status code because invalid id', done => {
+        chai
+          .request(app)
+          .get(link+'/3f3kfqdfwelfw')
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(404);
+            expect(res.body).to.be.an('object').to.have.any.keys('msg');
+            expect(res.body.msg).to.be.a('string');
+            expect(res.body.msg).to.equal('Your search was not found');
+            done()
+          })
+      })
+    })
+  })
+
 })

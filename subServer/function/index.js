@@ -9,7 +9,7 @@ const { rewardOne, rewardTwo, rewardThree, rewardFour, rewardFive } = require('.
 */
 
 module.exports = {
-  async selection (num, change) {
+  selection (num, change) {
     return new Promise ((resolve) => {
       if(Number(change) == 5000) resolve(rewardOne(num))
       else if(Number(change) == 12000) resolve(rewardTwo(num))
