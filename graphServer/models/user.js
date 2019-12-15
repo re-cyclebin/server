@@ -53,7 +53,7 @@ module.exports = {
       UserSignin: async (parent, args) => {
         if(args.token){
           try{ return await userSignin(args.token) }
-          catch(err) { console.log(err); throw new Error(err.response.data.msg) }
+          catch(err) { throw new Error(err.response.data.msg) }
         }else throw new Error('Please login first')
       },
       UserHistory: async (parent, args) => {

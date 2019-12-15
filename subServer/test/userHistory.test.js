@@ -199,7 +199,6 @@ describe('History user routes testing', _ => {
           .delete(link+`/${initialHistoryId}`)
           .set('token', initialTokenPull)
           .end((err, res) => {
-            console.log(res.body)
             ept(err).to.be.null;
             ept(res).to.have.status(403);
             ept(res.body).to.be.an('object').to.have.any.keys('msg');
@@ -214,7 +213,6 @@ describe('History user routes testing', _ => {
           .delete(link+`/${initialHistoryIdNew}`)
           .set('token', initialTokenOther)
           .end((err, res) => {
-            console.log(res.body)
             ept(err).to.be.null;
             ept(res).to.have.status(403);
             ept(res.body).to.be.an('object').to.have.any.keys('msg');
@@ -280,7 +278,6 @@ describe('History user routes testing', _ => {
           .get(link)
           .set('token', initialTokenOther)
           .end((err, res) => {
-            console.log(res.body)
             ept(err).to.be.null;
             ept(res).to.have.status(403);
             ept(res.body).to.be.an('object').to.have.any.keys('msg');
@@ -295,7 +292,6 @@ describe('History user routes testing', _ => {
           .get(link)
           .set('token', initialTokenPull)
           .end((err, res) => {
-            console.log(res.body)
             ept(err).to.be.null;
             ept(res).to.have.status(403);
             ept(res.body).to.be.an('object').to.have.any.keys('msg');
@@ -310,7 +306,6 @@ describe('History user routes testing', _ => {
           .get(link)
           .set('token', initialToken)
           .end((err, res) => {
-            console.log(res.body)
             ept(err).to.be.null;
             ept(res).to.have.status(403);
             ept(res.body).to.be.an('object').to.have.any.keys('msg');

@@ -14,7 +14,8 @@ module.exports = {
   },
   async createNewTrashCan ({ longitude, latitude, token }) {
     const { data } = await axios({ method: 'post', url: '/trashcan/admin', headers: { token }, data: { longitude, latitude } })
-    console.log(data)
+    await redis.del('saveTrashCan')
+    await redis.flushall()
     return data.trash
   },
   async updateLocationTrashCan ({ id, token, longitude, latitude }) {

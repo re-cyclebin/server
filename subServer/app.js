@@ -1,12 +1,4 @@
-// if(process.env.NODE_ENV == 'development') require('dotenv').config();
-var MONGO = ''
-if(process.env.NODE_ENV == 'development') {
-  require('dotenv').config()
-  MONGO = process.env.MONGODB_URL;
-}else if( process.env.NODE_ENV == 'testing') {
-  require('dotenv').config();
-  MONGO = process.env.MONGODB_TESTING
-}
+require('dotenv').config()
 
 const express = require('express'),
   cors = require('cors'),
@@ -22,16 +14,13 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-if(process.env.NODE_ENV == 'testing'){
-  mongoose.connect(`mongodb://localhost/${MONGO}`, { useFindAndModify: true, useNewUrlParser: true, useUnifiedTopology: true })
-  .then(_ => console.log('MongoDb now connected'))
-  .catch(console.log)
-}else {
-  mongoose.connect(`mongodb+srv://ericsudhartio:${process.env.MONGO_PASS}@cluster0-o92dt.mongodb.net/${process.env.MONGODB_URL}?retryWrites=true&w=majority`, { useFindAndModify: true, useNewUrlParser: true, useUnifiedTopology: true })
-  .then(_ => console.log('MongoDb now connected'))
-  .catch(console.log)
-}
+// mongoose.connect(`mongodb+srv://ericsudhartio:${process.env.MONGO_PASS}@cluster0-o92dt.mongodb.net/${process.env.MONGODB_URL}?retryWrites=true&w=majority`, { useFindAndModify: true, useNewUrlParser: true, useUnifiedTopology: true })
+//   .then(a => console.log('MongoDb now connected', a.connections[0].host))
+//   .catch(console.log)
 
+mongoose.connect(`mongodb://localhost/re-cycle-${process.env.NODE_ENV}`, { useFindAndModify: true, useNewUrlParser: true, useUnifiedTopology: true })
+  .then(a => console.log('MongoDb now connected (local/testing)', a.connections[0].name))
+  .catch(console.log)
 
 app.use('/', routes)
 app.use(errorhandler)
