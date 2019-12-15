@@ -13,6 +13,7 @@ let initialToken,
   initialHistoryId,
   initialTokenAdmin,
   initialTokenOther,
+  initialHistoryIdNew,
   falseToken = 'dfewgwaegawegewa'
 
 
@@ -33,7 +34,6 @@ before(done => {
       return User.create({ username: 'otherUser', password: 'OtherUser', email: 'other@gmail.com' })
     })
     .then(other => {
-      console.log('dapat other', other)
       const tokenOther = signToken({ id: other._id })
       initialTokenOther = tokenOther
       return User.create({ username: 'ffaewfewaf', email: 'fwefwef@gmail.com', password: 'fdafafdsF', role: 'admin' })
@@ -41,6 +41,10 @@ before(done => {
     .then(admin => {
       const tokenAdmin = signToken({ id: admin._id })
       initialTokenAdmin = tokenAdmin;
+      return UserHistory.create({ UserId: admin._id, point: 560 })
+    })
+    .then(newHistory => {
+      initialHistoryIdNew = newHistory._id
       done()
     })
     .catch(console.log)
@@ -50,11 +54,26 @@ after(done => {
   if(process.env.NODE_ENV == 'testing'){ 
     User.deleteMany({})
       .then(_ => {
-        console.log('testing history user success deleting');
+        console.log('testing history user success deleted');
+        return UserHistory.deleteMany({})
+      })
+      .then(() => {
+        console.log('testing userHistory user success deleted');
         done()
       })
       .catch(console.log)
   }
+})
+
+describe('env variable testing', _ => {
+  it('should return right think', done => {
+    ept(process.env.NODE_ENV).to.be.a('string');
+    ept(process.env.NODE_ENV).to.equal('testing');
+    ept(process.env.JWT_SECRET).to.be.a('string');
+    ept(process.env.JWT_SECRET).to.equal('recyclebin_finalProject');
+    ept(process.env.NODE_ENV).not.to.equal('development');
+    done()
+  })
 })
 
 
@@ -109,11 +128,25 @@ describe('History user routes testing', _ => {
             done();
           })
       })
-      it('should send an object msg with 403 status code because Do not have access', done => {
+      it('should send an object msg with 403 status code because Do not have access (pull)', done => {
         chai
           .request(app)
           .get(link)
           .set('token', initialTokenPull)
+          .end((err, res) => {
+            ept(err).to.be.null;
+            ept(res).to.have.status(403);
+            ept(res.body).to.be.an('object').to.have.any.keys('msg');
+            ept(res.body.msg).to.a('string');
+            ept(res.body.msg).to.equal('Do not have access');
+            done()
+          })
+      })
+      it('should send an object msg with 403 status code because Do not have access (admin)', done => {
+        chai
+          .request(app)
+          .get(link)
+          .set('token', initialTokenAdmin)
           .end((err, res) => {
             ept(err).to.be.null;
             ept(res).to.have.status(403);
@@ -166,11 +199,27 @@ describe('History user routes testing', _ => {
           .delete(link+`/${initialHistoryId}`)
           .set('token', initialTokenPull)
           .end((err, res) => {
+            console.log(res.body)
             ept(err).to.be.null;
             ept(res).to.have.status(403);
             ept(res.body).to.be.an('object').to.have.any.keys('msg');
             ept(res.body.msg).to.be.a('string');
             ept(res.body.msg).to.equal('Do not have access');
+            done()
+          })
+      })
+      it('should send an object msg with 403 status code because Authorization Error', done => {
+        chai
+          .request(app)
+          .delete(link+`/${initialHistoryIdNew}`)
+          .set('token', initialTokenOther)
+          .end((err, res) => {
+            console.log(res.body)
+            ept(err).to.be.null;
+            ept(res).to.have.status(403);
+            ept(res.body).to.be.an('object').to.have.any.keys('msg');
+            ept(res.body.msg).to.be.a('string');
+            ept(res.body.msg).to.equal('Authorization Error');
             done()
           })
       })
@@ -225,12 +274,43 @@ describe('History user routes testing', _ => {
             done()
           })
       })
-      it('should send an object msg with 403 status code because do not have access', done => {
+      it('should send an object msg with 403 status code because do not have access (other)', done => {
         chai
           .request(app)
           .get(link)
           .set('token', initialTokenOther)
           .end((err, res) => {
+            console.log(res.body)
+            ept(err).to.be.null;
+            ept(res).to.have.status(403);
+            ept(res.body).to.be.an('object').to.have.any.keys('msg');
+            ept(res.body.msg).to.be.a('string');
+            ept(res.body.msg).to.equal('Do not have access');
+            done();
+          })
+      })
+      it('should send an object msg with 403 status code because do not have access (puller)', done => {
+        chai
+          .request(app)
+          .get(link)
+          .set('token', initialTokenPull)
+          .end((err, res) => {
+            console.log(res.body)
+            ept(err).to.be.null;
+            ept(res).to.have.status(403);
+            ept(res.body).to.be.an('object').to.have.any.keys('msg');
+            ept(res.body.msg).to.be.a('string');
+            ept(res.body.msg).to.equal('Do not have access');
+            done();
+          })
+      })
+      it('should send an object msg with 403 status code because do not have access (user)', done => {
+        chai
+          .request(app)
+          .get(link)
+          .set('token', initialToken)
+          .end((err, res) => {
+            console.log(res.body)
             ept(err).to.be.null;
             ept(res).to.have.status(403);
             ept(res.body).to.be.an('object').to.have.any.keys('msg');

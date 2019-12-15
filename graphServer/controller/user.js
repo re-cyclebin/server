@@ -5,9 +5,14 @@ module.exports = {
     const { data } = await axios({ method: 'get', url: '/usersignin', headers: { token } })
     return data.user
   },
-  async signup ({ username, password, email }) {
-    const { data } = await axios({ method: 'post', url: '/signup', data: { username, email, password } })
-    return data.user
+  async signup ({ username, password, email, role, token }) {
+    if(token){
+      const { data } = await axios({ method: 'post', url: '/signup', data: { username, email, password, role }, headers: { token } })
+      return data.user
+    }else {
+      const { data } = await axios({ method: 'post', url: '/signup', data: { username, email, password, role } })
+      return data.user
+    }
   },
   async signin ({ request, password }) {
     const { data } = await axios({ method: 'post', url: '/signin', data: { request, password } })

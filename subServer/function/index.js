@@ -15,7 +15,7 @@ module.exports = {
       else if(Number(change) == 12000) resolve(rewardTwo(num))
       else if(Number(change) == 18000) resolve(rewardThree(num))
       else if(Number(change) == 30000) resolve(rewardFour(num))
-      else if(Number(change) == 80000) resolve(rewardFive(num))
+      else resolve(rewardFive(num))
     })
   }
 }

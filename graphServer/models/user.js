@@ -27,7 +27,7 @@ module.exports = {
     }
 
     type MsgUser {
-      msg: String
+      msgUser: String
     }
 
     extend type Query {
@@ -39,36 +39,44 @@ module.exports = {
     }
 
     extend type Mutation {
-      signup (username: String, password: String, email: String): User,
+      signup (username: String, password: String, email: String, role: String, token: String): User,
       signin (request: String, password: String): PackageSignin,
-      reward (getReward: String, id: String, token: String): User,
+      reward (getReward: Int, token: String): User,
       deleteUserHistory (token: String, id: String): MsgUser
 
 
-      postPoint (point: Int): User
+      postPoint (point: Int, token: String): User
     }
   `,
   resolverUser: {
     Query: {
       UserSignin: async (parent, args) => {
-        try{ return await userSignin(args.token) }
-        catch(err) { throw new Error(err.response.data.msg) }
+        if(args.token){
+          try{ return await userSignin(args.token) }
+          catch(err) { console.log(err); throw new Error(err.response.data.msg) }
+        }else throw new Error('Please login first')
       },
       UserHistory: async (parent, args) => {
-        try{ return await userHistory(args.token) }
-        catch(err) { throw new Error(err.response.data.msg) }
+        if(args.token){
+          try{ return await userHistory(args.token) }
+          catch(err) { throw new Error(err.response.data.msg) }
+        }else throw new Error('Do not have access')
       },
 
       //admin
       AllHistoryAdmin: async (parent, args) => {
-        try{ return await allHistoryAdmin(args.token) }
-        catch(err) { throw new Error(err.response.data.msg) }
+        if(args.token){
+          try{ return await allHistoryAdmin(args.token) }
+          catch(err) { throw new Error(err.msg) }
+        }else {
+          throw new Error('Do not have access')
+        }
       }
     },
     Mutation: {
       signup: async (parent, args) => {
-        const { username, password, email } = args
-        try{ return await signup({ username, password, email }) }
+        const { username, password, email, role, token } = args
+        try{ return await signup({ username, password, email, role, token }) }
         catch(err) { throw new Error({msg: err.response.data.msg, errors: err.response.data.errors}) }
       },
       signin: async (parent, args) => {
@@ -78,18 +86,24 @@ module.exports = {
       },
       postPoint: async (parent, args) => {
         const { point, token } = args;
-        try{ return await getPoint({ token, point }) }
-        catch(err) { throw new Error(err.response.data.msg) }
+        if(token){
+          try{ return await getPoint({ token, point }) }
+          catch(err) { throw new Error(err.response.data.msg) }
+        }else throw new Error('Do not have access');
       },
       reward: async (parent, args) => {
-        const { getReward, id, token } = args;
-        try { return await userGetReward({ token, getReward, id }) }
-        catch(err) { throw new Error(err.response.data.msg) }
+        const { getReward, token } = args;
+        if(token){
+          try { return await userGetReward({ token, getReward }) }
+          catch(err) { throw new Error(err.response.data.msg) }
+        } else throw new Error('Do not have access');
       },
       deleteUserHistory: async (parent, args) => {
         const { token, id } = args;
-        try { return await deleteHistoryUser({ token, id }) }
-        catch(err) { throw new Error(err.response.data.msg) }
+        if(token){
+          try { return await deleteHistoryUser({ token, id }) }
+          catch(err) { throw new Error(err.response.data.msg) }
+        } else throw new Error('Do not have access');
       }
     }
   }

@@ -14,7 +14,8 @@ let initialTokenAdmin='',
   initialTokenPull='',
   initialTrash='',
   initialTrash2 = '',
-  falseToken = 'fdsafewfupf2jd2idwds'
+  falseToken = 'fdsafewfupf2jd2idwds',
+  initialTrashUpdated = ''
 
 before(done => {
   const dummyUserAdmin = { username: 'ericsudhartio', email: 'sudhartioeric123@gmail.com', password: 'FinalProject', role: 'admin' }
@@ -64,6 +65,26 @@ after(done => {
       .catch(console.log)
   }
 }) 
+
+function updateTrashID (id) {
+  Trash.findByIdAndUpdate(id, { status: true }, {new:true})
+    .then(trash => {
+      initialTrashUpdated = trash;
+    })
+    .catch(console.log)
+}
+
+describe('env variable testing', _ => {
+  it('should return right think', done => {
+    expect(process.env.NODE_ENV).to.be.a('string');
+    expect(process.env.NODE_ENV).to.equal('testing');
+    expect(process.env.JWT_SECRET).to.be.a('string');
+    expect(process.env.JWT_SECRET).to.equal('recyclebin_finalProject');
+    expect(process.env.NODE_ENV).not.to.equal('development');
+    done()
+  })
+})
+
 
 describe('Testing for Trash Can Routes', _ => {
   describe('POST /trashcan/admin', _ => {
@@ -133,11 +154,26 @@ describe('Testing for Trash Can Routes', _ => {
             done();
           })
       })
-      it('should send an object msg with 403 status code because autorization error', done => {
+      it('should send an object msg with 403 status code because do not have access ( user )', done => {
         chai
           .request(app)
           .post(link)
           .set('token', initialToken)
+          .send(newTrash)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(403);
+            expect(res.body).to.be.an('object').to.have.any.keys('msg');
+            expect(res.body.msg).to.be.a('string');
+            expect(res.body.msg).to.equal('Do not have access');
+            done()
+          })
+      })
+      it('should send an object msg with 403 status code because do not have access ( puller )', done => {
+        chai
+          .request(app)
+          .post(link)
+          .set('token', initialTokenPull)
           .send(newTrash)
           .end((err, res) => {
             expect(err).to.be.null;
@@ -191,13 +227,54 @@ describe('Testing for Trash Can Routes', _ => {
             expect(err).to.be.null;
             expect(res).to.have.status(200);
             expect(res.body).to.be.an('object').to.have.any.keys('trasher');
-            expect(res.body.trasher[0]).to.be.an('object').to.have.any.keys('location', 'height', 'wieght', 'avaible');
+            expect(res.body.trasher[0]).to.be.an('object').to.have.any.keys('location', 'height', 'wieght', 'avaible', 'status');
             expect(res.body.trasher[0].location).to.be.an('object').to.have.any.keys('longitude', 'latitude')
             expect(res.body.trasher[0].location.longitude).to.be.a('string');
             expect(res.body.trasher[0].location.latitude).to.be.a('string');
             expect(res.body.trasher[0].height).to.be.a('number');
             expect(res.body.trasher[0].weight).to.be.a('number');
             expect(res.body.trasher[0].avaible).to.be.an('boolean');
+            expect(res.body.trasher[0].status).to.be.an('boolean');
+            done()
+          })
+      })
+      it('should send an object msg with 200 status code ( puller )', done => {
+        chai
+          .request(app)
+          .get(link)
+          .set('token', initialTokenPull)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(200);
+            expect(res.body).to.be.an('object').to.have.any.keys('trasher');
+            expect(res.body.trasher[0]).to.be.an('object').to.have.any.keys('location', 'height', 'wieght', 'avaible', 'status');
+            expect(res.body.trasher[0].location).to.be.an('object').to.have.any.keys('longitude', 'latitude')
+            expect(res.body.trasher[0].location.longitude).to.be.a('string');
+            expect(res.body.trasher[0].location.latitude).to.be.a('string');
+            expect(res.body.trasher[0].height).to.be.a('number');
+            expect(res.body.trasher[0].weight).to.be.a('number');
+            expect(res.body.trasher[0].avaible).to.be.an('boolean');
+            expect(res.body.trasher[0].status).to.be.an('boolean');
+            done()
+          })
+      })
+      it('should send an object msg with 200 status code ( admin )', done => {
+        chai
+          .request(app)
+          .get(link)
+          .set('token', initialTokenAdmin)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(200);
+            expect(res.body).to.be.an('object').to.have.any.keys('trasher');
+            expect(res.body.trasher[0]).to.be.an('object').to.have.any.keys('location', 'height', 'wieght', 'avaible', 'status');
+            expect(res.body.trasher[0].location).to.be.an('object').to.have.any.keys('longitude', 'latitude')
+            expect(res.body.trasher[0].location.longitude).to.be.a('string');
+            expect(res.body.trasher[0].location.latitude).to.be.a('string');
+            expect(res.body.trasher[0].height).to.be.a('number');
+            expect(res.body.trasher[0].weight).to.be.a('number');
+            expect(res.body.trasher[0].avaible).to.be.an('boolean');
+            expect(res.body.trasher[0].status).to.be.an('boolean');
             done()
           })
       })
@@ -247,7 +324,7 @@ describe('Testing for Trash Can Routes', _ => {
             expect(err).to.be.null;
             expect(res).to.have.status(200);
             expect(res.body).to.be.an('object').to.have.any.keys('trash');
-            expect(res.body.trash).to.be.an('object').to.have.any.keys('_id', 'location', 'weight', 'height', 'avaible');
+            expect(res.body.trash).to.be.an('object').to.have.any.keys('_id', 'location', 'weight', 'height', 'avaible','status');
             expect(res.body.trash.avaible).to.be.an('boolean');
             expect(res.body.trash.height).to.be.a('number');
             expect(res.body.trash.weight).to.be.a('number');
@@ -255,6 +332,7 @@ describe('Testing for Trash Can Routes', _ => {
             expect(res.body.trash.location).to.be.an('object').to.have.any.keys('latitude', 'longitude');
             expect(res.body.trash.location.longitude).to.be.a('string');
             expect(res.body.trash.location.latitude).to.be.a('string');
+            expect(res.body.trash.status).to.be.a('boolean');
             expect(res.body.trash._id).to.be.a('string');
             done()
           })
@@ -270,12 +348,13 @@ describe('Testing for Trash Can Routes', _ => {
             expect(err).to.be.null;
             expect(res).to.have.status(200);
             expect(res.body).to.be.an('object').to.have.any.keys('trash')
-            expect(res.body.trash).to.be.an('object').to.have.any.keys('_id', 'height', 'weight', 'avaible');
+            expect(res.body.trash).to.be.an('object').to.have.any.keys('_id', 'height', 'weight', 'avaible', 'status');
             expect(res.body.trash._id).to.be.a('string');
             expect(res.body.trash.height).to.be.a('number');
             expect(res.body.trash.weight).to.be.a('number');
             expect(res.body.trash.avaible).to.be.a('boolean');
             expect(res.body.trash.avaible).not.to.equal(initialTrash.avaible);
+            expect(res.body.trash.status).to.be.a('boolean');
             done()
           })
       })
@@ -351,12 +430,37 @@ describe('Testing for Trash Can Routes', _ => {
             expect(err).to.be.null;
             expect(res).to.have.status(200);
             expect(res.body).to.be.an('object').to.have.any.keys('trash');
-            expect(res.body.trash).to.be.an('object').to.have.any.keys('_id', 'location', 'height', 'weight', 'avaible');
+            expect(res.body.trash).to.be.an('object').to.have.any.keys('_id', 'location', 'height', 'weight', 'avaible', 'status');
             expect(res.body.trash.location).to.be.an('object').to.have.any.keys('longitude', 'latitude');
             expect(res.body.trash.location.longitude).to.be.a('string');
             expect(res.body.trash.location.latitude).to.be.a('string');
             expect(res.body.trash.location.longitude).not.to.equal(initialTrash.location.longitude);
             expect(res.body.trash.location.latitude).not.to.equal(initialTrash.location.latitude);
+            expect(res.body.trash.status).to.be.an('boolean');
+            expect(res.body.trash.height).to.be.a('number');
+            expect(res.body.trash.weight).to.be.a('number');
+            expect(res.body.trash._id).to.be.a('string');
+            done()
+          })
+      })
+      it('should send an object trash with 200 status code', done => {
+        let newLocations = { latitude: 8.212, longitude: 1212.31}
+        chai
+          .request(app)
+          .patch(link+`/${initialTrash._id}`)
+          .set('token', initialTokenAdmin)
+          .send(newLocations)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(200);
+            expect(res.body).to.be.an('object').to.have.any.keys('trash');
+            expect(res.body.trash).to.be.an('object').to.have.any.keys('_id', 'location', 'height', 'weight', 'avaible', 'status');
+            expect(res.body.trash.location).to.be.an('object').to.have.any.keys('longitude', 'latitude');
+            expect(res.body.trash.location.longitude).to.be.a('string');
+            expect(res.body.trash.location.latitude).to.be.a('string');
+            expect(res.body.trash.location.longitude).not.to.equal(initialTrash.location.longitude);
+            expect(res.body.trash.location.latitude).not.to.equal(initialTrash.location.latitude);
+            expect(res.body.trash.status).to.be.an('boolean');
             expect(res.body.trash.height).to.be.a('number');
             expect(res.body.trash.weight).to.be.a('number');
             expect(res.body.trash._id).to.be.a('string');
@@ -399,11 +503,26 @@ describe('Testing for Trash Can Routes', _ => {
             done();
           })
       })
-      it('should send an object msg with 403 status code because Do not have access', done => {
+      it('should send an object msg with 403 status code because Do not have access (user)', done => {
         chai
           .request(app)
           .patch(link+`/${initialTrash._id}`)
           .set('token', initialToken)
+          .send(newLocation)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(403);
+            expect(res.body).to.be.an('object').to.have.any.keys('msg');
+            expect(res.body.msg).to.be.a('string');
+            expect(res.body.msg).to.equal('Do not have access');
+            done()
+          })
+      })
+      it('should send an object msg with 403 status code because Do not have access (puller)', done => {
+        chai
+          .request(app)
+          .patch(link+`/${initialTrash._id}`)
+          .set('token', initialTokenPull)
           .send(newLocation)
           .end((err, res) => {
             expect(err).to.be.null;
@@ -483,11 +602,25 @@ describe('Testing for Trash Can Routes', _ => {
       })
     })
     describe('error process deleting trashcan', _ => {
-      it('should send an object msg with 403 status code because Do not have access', done => {
+      it('should send an object msg with 403 status code because Do not have access (user)', done => {
         chai
           .request(app)
           .delete(link+`/${initialTrash._id}`)
           .set('token', initialToken)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(403);
+            expect(res.body).to.be.an('object').to.have.any.keys('msg');
+            expect(res.body.msg).to.be.a('string');
+            expect(res.body.msg).to.equal('Do not have access');
+            done()
+          })
+      })
+      it('should send an object msg with 403 status code because Do not have access (puller)', done => {
+        chai
+          .request(app)
+          .delete(link+`/${initialTrash._id}`)
+          .set('token', initialTokenPull)
           .end((err, res) => {
             expect(err).to.be.null;
             expect(res).to.have.status(403);
@@ -564,6 +697,26 @@ describe('Testing for Trash Can Routes', _ => {
             done()
           })
       })
+      it('should send an object ( msg, trash ) with 200 status code', done => {
+        updateTrashID(initialTrash2._id)
+        chai
+          .request(app)
+          .patch(link+`/${initialTrash2._id}`)
+          .set('token', initialToken)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(200);
+            expect(res.body).to.be.an('object').to.have.any.keys('msg', 'trash');
+            expect(res.body.msg).to.be.a('string');
+            expect(res.body.msg).to.equal('update success');
+            expect(res.body.trash).to.be.an('object').to.have.any.keys('height', 'weight', 'status');
+            expect(res.body.trash.height).to.be.a('number');
+            expect(res.body.trash.weight).to.be.a('number');
+            expect(res.body.trash.status).to.be.an('boolean');
+            expect(res.body.trash.status).not.to.equal(initialTrashUpdated.status);
+            done()
+          })
+      })
     })
     describe('error process update status when user request', _ => {
       it('should send an object (msg) with 403 status code because invalid token', done => {
@@ -595,11 +748,25 @@ describe('Testing for Trash Can Routes', _ => {
             done()
           })
       })
-      it('should send an object (msg) with 403 status code because Do not have access', done => {
+      it('should send an object (msg) with 403 status code because Do not have access (puller)', done => {
         chai
           .request(app)
           .patch(link+`/${initialTrash2._id}`)
           .set('token', initialTokenPull)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(403);
+            expect(res.body).to.be.an('object').to.have.any.keys('msg');
+            expect(res.body.msg).to.be.a('string');
+            expect(res.body.msg).to.equal('Do not have access');
+            done();
+          })
+      })
+      it('should send an object (msg) with 403 status code because Do not have access (admin)', done => {
+        chai
+          .request(app)
+          .patch(link+`/${initialTrash2._id}`)
+          .set('token', initialTokenAdmin)
           .end((err, res) => {
             expect(err).to.be.null;
             expect(res).to.have.status(403);
@@ -623,6 +790,7 @@ describe('Testing for Trash Can Routes', _ => {
             expect(err).to.be.null;
             expect(res).to.have.status(200);
             expect(res.body).to.be.an('boolean');
+            expect(res.body).to.equal(initialTrash2.status)
             done()
           })
       })

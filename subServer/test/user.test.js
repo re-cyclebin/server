@@ -12,6 +12,7 @@ let initialId,
   initialToken,
   initialUser,
   initialTrash,
+  initialTokenAdmin,
   initialTokenPull,
   falsetoken = 'fewniwpfnafwamfksmkfnskflnaskfc2'
 
@@ -35,6 +36,10 @@ before(done => {
     })
     .then(pul => {
       initialTokenPull = signToken({ id: pul._id, username: pul.username, email: pul.email })
+      return User.create({ username: 'admin123', password: 'asfsf12sdfS', email: 'fewfefw@gmail.com', role: 'admin' })
+    })
+    .then(admin => {
+      initialTokenAdmin = signToken({ id: admin._id });
       done()
     })
     .catch(console.log)
@@ -52,6 +57,17 @@ function updatePoint (num) {
   User.findByIdAndUpdate(initialId, { point: Number(num) }, {new:true})
     .then(user => { initialUser = user; console.log('success update') })
 }
+
+describe('env variable testing', _ => {
+  it('should return right think', done => {
+    expect(process.env.NODE_ENV).to.be.a('string');
+    expect(process.env.NODE_ENV).to.equal('testing');
+    expect(process.env.JWT_SECRET).to.be.a('string');
+    expect(process.env.JWT_SECRET).to.equal('recyclebin_finalProject');
+    expect(process.env.NODE_ENV).not.to.equal('development');
+    done()
+  })
+})
 
 describe('Testing for User Routes', _ => {
   describe('POST /signup', _ => {
@@ -92,6 +108,7 @@ describe('Testing for User Routes', _ => {
         chai
           .request(app)
           .post(link)
+          .set('token', initialTokenAdmin)
           .send(userPull)
           .end((err, res) => {
             expect(err).to.be.null;
@@ -119,6 +136,7 @@ describe('Testing for User Routes', _ => {
           .request(app)
           .post(link)
           .send(userAdmin)
+          .set('token', initialTokenAdmin)
           .end((err, res) => {
             expect(err).to.be.null;
             expect(res).to.have.status(201);
@@ -131,6 +149,28 @@ describe('Testing for User Routes', _ => {
             expect(res.body.user.reward).to.equal(0);
             expect(res.body.user.role).to.be.a('string');
             expect(res.body.user.role).to.equal('admin');
+            done();
+          })
+      })
+      it('should send an object (user) with 201 status code and role is user', done => {
+        let newUser = { username: 'fsdfsdf', password: 'fsafawefewF', email: 'faewfewf@gmail.com' }
+        chai
+          .request(app)
+          .post(link)
+          .send(newUser)
+          .set('token', initialTokenAdmin)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(201);
+            expect(res.body).to.be.an('object').to.have.any.keys('user');
+            expect(res.body.user).to.be.an('object').to.have.any.keys('_id', 'username', 'password', 'email', 'role', 'point', 'reward');
+            expect(res.body.user.password).to.not.equal(newUser.password);
+            expect(res.body.user.point).to.be.a('number');
+            expect(res.body.user.point).to.equal(0);
+            expect(res.body.user.reward).to.be.a('number');
+            expect(res.body.user.reward).to.equal(0);
+            expect(res.body.user.role).to.be.a('string');
+            expect(res.body.user.role).to.equal('user');
             done();
           })
       })
@@ -255,6 +295,85 @@ describe('Testing for User Routes', _ => {
             done()
           })
       })
+      it('should send an object (msg) with status code 403 because do not have access', done => {
+        let newUserPuller = { username: 'fdafaewff', password: 'Fdafwe', email: 'efkeae@gmail.com', role: 'puller' }
+        chai
+          .request(app)
+          .post(link)
+          .set('token', initialToken)
+          .send(newUserPuller)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(403);
+            expect(res.body).to.be.an('object').to.have.any.keys('msg');
+            expect(res.body.msg).to.be.a('string');
+            expect(res.body.msg).to.equal('Do not have access');
+            done()
+          })
+      })
+      it('should send an object (msg) with status code 403 because do not have access', done => {
+        let newUserPuller = { username: 'fdafaewff', password: 'Fdafwe', email: 'efkeae@gmail.com', role: 'puller' }
+        chai
+          .request(app)
+          .post(link)
+          .set('token', initialTokenPull)
+          .send(newUserPuller)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(403);
+            expect(res.body).to.be.an('object').to.have.any.keys('msg');
+            expect(res.body.msg).to.be.a('string');
+            expect(res.body.msg).to.equal('Do not have access');
+            done()
+          })
+      })
+      it('should send an object (msg) with 403 status code because do not have access', done => {
+        let newUserPuller = { username: 'fwwefwfdsf', password: 'fwefewfF', email: 'fafawef@mgail.com', role: 'admin' }
+        chai
+          .request(app)
+          .post(link)
+          .set('token', initialToken)
+          .send(newUserPuller)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(403);
+            expect(res.body).to.be.an('object').to.have.any.keys('msg');
+            expect(res.body.msg).to.be.a('string');
+            expect(res.body.msg).to.equal('Do not have access');
+            done()
+          })
+      })
+      it('should send an object (msg) with 403 status code because missing token', done => {
+        let newUserPuller = { username: 'faefwefwef', password: 'fdfweF', email: 'fewf@gmail.com', role: 'puller' }
+        chai
+          .request(app)
+          .post(link)
+          .send(newUserPuller)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(403);
+            expect(res.body).to.be.an('object').to.have.any.keys('msg');
+            expect(res.body.msg).to.be.a('string');
+            expect(res.body.msg).to.equal('Do not have access');
+            done()
+          })
+      })
+      it('snould send an object (msg) with 403 status code because invalid token', done => {
+        let newUserPuller = { username: 'fdafsadfsadgasd', password: 'dfafsdF', email: 'dafef@gmail.com', role: 'puller' }
+        chai
+          .request(app)
+          .post(link)
+          .set('token', falsetoken)
+          .send(newUserPuller)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(403);
+            expect(res.body).to.be.an('object').to.have.any.keys('msg');
+            expect(res.body.msg).to.be.a('string');
+            expect(res.body.msg).to.equal('Invalid Token');
+            done()
+          })
+      })
     })
   })
   
@@ -365,8 +484,6 @@ describe('Testing for User Routes', _ => {
           .get(link)
           .set('token', initialToken)
           .end((err, res) => {
-            console.log(res.body)
-            console.log('tokennya', initialToken)
             expect(err).to.be.null;
             expect(res).to.have.status(200);
             expect(res.body).to.be.an('object').to.have.any.keys('user');
@@ -374,9 +491,47 @@ describe('Testing for User Routes', _ => {
             expect(res.body.user._id).to.be.a('string');
             expect(res.body.user.username).to.be.a('string');
             expect(res.body.user.email).to.be.a('string');
+            expect(res.body.user.role).to.be.a('string');
+            expect(res.body.user.role).to.equal('user');
             done()
           })
       })
+      it('should send an object (user, token) with 200 status code (pull)', done => {
+        chai
+          .request(app)
+          .get(link)
+          .set('token', initialTokenPull)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(200);
+            expect(res.body).to.be.an('object').to.have.any.keys('user');
+            expect(res.body.user).to.be.an('object').to.have.any.keys('_id', 'username', 'email');
+            expect(res.body.user._id).to.be.a('string');
+            expect(res.body.user.username).to.be.a('string');
+            expect(res.body.user.email).to.be.a('string');
+            expect(res.body.user.role).to.be.a('string');
+            expect(res.body.user.role).to.equal('puller');
+            done()
+          })
+      })
+    })
+    it('should send an object (user, token) with 200 status code admin', done => {
+      chai
+        .request(app)
+        .get(link)
+        .set('token', initialTokenAdmin)
+        .end((err, res) => {
+          expect(err).to.be.null;
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an('object').to.have.any.keys('user');
+          expect(res.body.user).to.be.an('object').to.have.any.keys('_id', 'username', 'email');
+          expect(res.body.user._id).to.be.a('string');
+          expect(res.body.user.username).to.be.a('string');
+          expect(res.body.user.email).to.be.a('string');
+          expect(res.body.user.role).to.be.a('string');
+          expect(res.body.user.role).to.equal('admin');
+          done()
+        })
     })
     describe('error process check userSignin', _ => {
       it('should send an object msg with 403 status code because missing Token', done => {
@@ -403,6 +558,18 @@ describe('Testing for User Routes', _ => {
             expect(res.body).to.be.an('object').to.have.any.keys('msg');
             expect(res.body.msg).to.be.a('string');
             expect(res.body.msg).to.equal('Invalid Token');
+            done()
+          })
+      })
+      it('should send an object msg with 404 status code because bad request link', done => {
+        chai
+          .request(app)
+          .get('/signinfwe')
+          .set('token', initialToken)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(404);
+            expect(res.body).to.be.an('object')
             done()
           })
       })

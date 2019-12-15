@@ -38,8 +38,8 @@ module.exports = {
         if(!trash.status) return Trash.findByIdAndUpdate(req.params.id, { status: true }, { new: true })
         else return Trash.findByIdAndUpdate(req.params.id, { status: false }, { new: true })
       })
-      .then(trash => {
-        //hapus redis
+      .then(async trash => {
+        await redis.del(`StatusTrash:${req.params.id}`)
         res.status(200).json({ trash, msg: 'update success' })
       })
       .catch(next)
@@ -48,7 +48,6 @@ module.exports = {
   updateTrashPushUser ( req, res, next ) {
     const { height, weight } = req.body,
       numHeight = 100.8 - height
-      console.log(height, weight)
     if(!height || !weight) next({ status: 400, msg: 'missing height/weight value' })
     else {
       if(numHeight <= 90) {
@@ -67,8 +66,8 @@ module.exports = {
     if(getTrashIdStatus) res.status(200).json(JSON.parse(getTrashIdStatus))
     else {
       Trash.findById(req.params.id)
-        .then(trash => {
-          // await redis.set(`StatusTrash:${req.params.id}`, JSON.stringify(trash.status))
+        .then(async trash => {
+          await redis.set(`StatusTrash:${req.params.id}`, JSON.stringify(trash.status))
           res.status(200).json(trash.status)
         })
         .catch(next)

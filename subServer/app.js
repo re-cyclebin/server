@@ -1,5 +1,12 @@
 // if(process.env.NODE_ENV == 'development') require('dotenv').config();
-if(process.env.NODE_ENV) require('dotenv').config()
+var MONGO = ''
+if(process.env.NODE_ENV == 'development') {
+  require('dotenv').config()
+  MONGO = process.env.MONGODB_URL;
+}else if( process.env.NODE_ENV == 'testing') {
+  require('dotenv').config();
+  MONGO = process.env.MONGODB_TESTING
+}
 
 const express = require('express'),
   cors = require('cors'),
@@ -15,7 +22,7 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-mongoose.connect(process.env.MONGODB_URL, { useFindAndModify: true, useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(`mongodb://localhost/${MONGO}`, { useFindAndModify: true, useNewUrlParser: true, useUnifiedTopology: true })
 .then(_ => console.log('MongoDb now connected'))
 .catch(console.log)
 

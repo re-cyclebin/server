@@ -3,10 +3,10 @@ const Route = require('express').Router(),
   { signin, signup, getSignInUser, changeRewards, userGetPoint } = userController,
   { getAllUserHistory, deleteUserHistory, getAllHistoryGlobal } = userHisController,
   { auth } = require('../middlewares'),
-  { authentication, authorUser, authorDeleteHistory, authorAdmin } = auth
+  { authentication, authorUser, authorDeleteHistory, authorAdmin, checkForSignup, isAdmin, authorizationSignUpRole } = auth
 
 Route.post('/signin', signin);
-Route.post('/signup', signup);
+Route.post('/signup', checkForSignup, isAdmin, authorizationSignUpRole, signup);
 
 Route.get('/usersignin', authentication, getSignInUser);
 Route.patch('/reward', authentication, changeRewards);

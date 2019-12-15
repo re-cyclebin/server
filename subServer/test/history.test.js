@@ -60,6 +60,18 @@ after(done => {
   }
 })
 
+describe('env variable testing', _ => {
+  it('should return right think', done => {
+    expect(process.env.NODE_ENV).to.be.a('string');
+    expect(process.env.NODE_ENV).to.equal('testing');
+    expect(process.env.JWT_SECRET).to.be.a('string');
+    expect(process.env.JWT_SECRET).to.equal('recyclebin_finalProject');
+    expect(process.env.NODE_ENV).not.to.equal('development');
+    done()
+  })
+})
+
+
 describe('Testing for History trashcan up', _ => {
   describe('POST /history/:id (trashId)', _ => {
     let link = '/history/';
@@ -243,11 +255,25 @@ describe('Testing for History trashcan up', _ => {
             done();
           })
       })
-      it('should send an object msg with 403 status code because Do not have access', done => {
+      it('should send an object msg with 403 status code because Do not have access (user)', done => {
         chai
           .request(app)
           .delete(link+initialHistory)
           .set('token', initialTokenUser)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(403);
+            expect(res.body).to.be.an('object').to.have.any.keys('msg');
+            expect(res.body.msg).to.be.a('string');
+            expect(res.body.msg).to.equal('Do not have access');
+            done();
+          })
+      })
+      it('should send an object msg with 403 status code because Do not have access (puller)', done => {
+        chai
+          .request(app)
+          .delete(link+initialHistory)
+          .set('token', initialTokenPull)
           .end((err, res) => {
             expect(err).to.be.null;
             expect(res).to.have.status(403);
