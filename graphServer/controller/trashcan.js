@@ -5,17 +5,10 @@ const { saveTrashCan } = require('../helpers'),
 module.exports = {
   async AllTrashCan (token) {
     const { data } = await axios({ method: 'get', url: '/trashcan', headers: { token } })
-    const getSaveTrashCan = await redis.get('saveTrashCan');
-    if(getSaveTrashCan) return JSON.parse(getSaveTrashCan);
-    else {
-      saveTrashCan(data.trasher);
-      return data.trasher;
-    }
+    return data.trasher;
   },
   async createNewTrashCan ({ longitude, latitude, token }) {
     const { data } = await axios({ method: 'post', url: '/trashcan/admin', headers: { token }, data: { longitude, latitude } })
-    await redis.del('saveTrashCan')
-    await redis.flushall()
     return data.trash
   },
   async updateLocationTrashCan ({ id, token, longitude, latitude }) {
