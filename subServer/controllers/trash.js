@@ -62,15 +62,15 @@ module.exports = {
     }
   },
   async getStatusTrash ( req, res, next ) {
-    const getTrashIdStatus = await redis.get(`StatusTrash:${req.params.id}`)
-    if(getTrashIdStatus) res.status(200).json(JSON.parse(getTrashIdStatus))
-    else {
+    // const getTrashIdStatus = await redis.get(`StatusTrash:${req.params.id}`)
+    // if(getTrashIdStatus) res.status(200).json(JSON.parse(getTrashIdStatus))
+    // else {
       Trash.findById(req.params.id)
         .then(async trash => {
-          await redis.set(`StatusTrash:${req.params.id}`, JSON.stringify(trash.status))
+          // await redis.set(`StatusTrash:${req.params.id}`, JSON.stringify(trash.status))
           res.status(200).json(trash.status)
         })
         .catch(next)
-    }
+    // }
   }
 }
