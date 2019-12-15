@@ -22,9 +22,16 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-mongoose.connect(`mongodb://localhost/${MONGO}`, { useFindAndModify: true, useNewUrlParser: true, useUnifiedTopology: true })
-.then(_ => console.log('MongoDb now connected'))
-.catch(console.log)
+if(process.env.NODE_ENV == 'development'){
+  mongoose.connect(`mongodb+srv://ericsudhartio:${MONGO_PASS}@cluster0-o92dt.mongodb.net/${MONGODB_URL}?retryWrites=true&w=majority`, { useFindAndModify: true, useNewUrlParser: true, useUnifiedTopology: true })
+  .then(_ => console.log('MongoDb now connected'))
+  .catch(console.log)
+}else {
+  mongoose.connect(`mongodb://localhost/${MONGO}`, { useFindAndModify: true, useNewUrlParser: true, useUnifiedTopology: true })
+  .then(_ => console.log('MongoDb now connected'))
+  .catch(console.log)
+}
+
 
 app.use('/', routes)
 app.use(errorhandler)
