@@ -1,6 +1,6 @@
 const { gql } = require('apollo-server'),
   { trashcanController } = require('../controller'),
-  { AllTrashCan, createNewTrashCan, updateLocationTrashCan, deleteTrashCan, openTrashCan } = trashcanController
+  { TrashId, AllTrashCan, createNewTrashCan, updateLocationTrashCan, deleteTrashCan, openTrashCan } = trashcanController
 
 
 module.exports = {
@@ -16,7 +16,9 @@ module.exports = {
       height: Float,
       weight: Float,
       avaible: Boolean,
-      status: Boolean
+      status: Boolean,
+      createdAt: String,
+      updatedAt: String
     }
 
     type MsgTrashCan {
@@ -24,7 +26,8 @@ module.exports = {
     }
 
     extend type Query {
-      AllTrash (token: String): [ Trash ]
+      AllTrash (token: String): [ Trash ],
+      TrashId (id:String, token:String): Trash
     }
 
     extend type Mutation {
@@ -39,6 +42,11 @@ module.exports = {
     Query: {
       AllTrash: async (parent, args) => {
         try{ return await AllTrashCan(args.token) }
+        catch(err) { throw new Error(err.response.data.msg) }
+      },
+      TrashId: async (parent, args) => {
+        const { token, id } = args;
+        try { return await TrashId({ token, id }) }
         catch(err) { throw new Error(err.response.data.msg) }
       }
     },

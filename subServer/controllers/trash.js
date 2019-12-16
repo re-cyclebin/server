@@ -44,6 +44,11 @@ module.exports = {
       })
       .catch(next)
   },
+  getOneTrash ( req, res, next ) {
+    Trash.findById(req.params.id)
+      .then(trash => res.status(200).json({ trash }))
+      .catch(next)
+  },
   // -------------- IOT CONTROLLER ------------
   updateTrashPushUser ( req, res, next ) {
     const { height, weight } = req.body,

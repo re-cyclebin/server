@@ -22,5 +22,9 @@ module.exports = {
   async openTrashCan ({ id, token }) {
     const { data } = await axios({ method: 'patch', url: `/trashcan/status/${id}`, headers: { token } })
     return data.trash
+  },
+  async TrashId ({ id, token }) {
+    const { data } = await axios({ method: 'get', url: `/trashcan/${id}`, headers: { token } })
+    return data.trash
   }
 }
