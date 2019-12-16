@@ -33,7 +33,7 @@ module.exports = {
   },
   async deleteHistoryUser ({ token, id }) {
     const { data } = await axios({ method: 'delete', url: `/hisuser/${id}`, headers: { token } })
-    return data.msg
+    return data
   },
 
   // ADMIN

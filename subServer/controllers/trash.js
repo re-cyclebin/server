@@ -52,14 +52,19 @@ module.exports = {
   // -------------- IOT CONTROLLER ------------
   updateTrashPushUser ( req, res, next ) {
     const { height, weight } = req.body,
-      numHeight = 100.8 - height
+      numHeight = 40 - height
+      console.log(height, weight)
+      console.log('==============')
+      console.log(numHeight)
     if(!height || !weight) next({ status: 400, msg: 'missing height/weight value' })
     else {
-      if(numHeight <= 90) {
+      if(numHeight <= 30) {
+        console.log('masuk dbwh 30')
         Trash.findByIdAndUpdate(req.params.id, { height: numHeight, weight }, { new: true })
           .then(trash => res.status(200).json({ trash }))
           .catch(next)
       } else {
+        console.log('masuk else')
         Trash.findByIdAndUpdate(req.params.id, { avaible: false }, { new: true })
           .then(trash => res.status(200).json({ trash }))
           .catch(next)
@@ -71,7 +76,7 @@ module.exports = {
     // if(getTrashIdStatus) res.status(200).json(JSON.parse(getTrashIdStatus))
     // else {
       Trash.findById(req.params.id)
-        .then(async trash => {
+        .then(trash => {
           // await redis.set(`StatusTrash:${req.params.id}`, JSON.stringify(trash.status))
           res.status(200).json(trash.status)
         })

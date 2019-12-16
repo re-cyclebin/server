@@ -12,13 +12,13 @@ module.exports = {
       return data.histories;
     }
   },
-  async makeHistory ({ token, id, height, weight }) {
-    const { data } = await axios({ method: 'post', url: `/history/${id}`, data: { height, weight }, headers: { token } })
+  async makeHistory ({ token, id }) {
+    const { data } = await axios({ method: 'post', url: `/history/${id}`, headers: { token } })
     redis.del('saveHistory')
     return data.history
   },
   async deleteSomeHistory ({ token, id }) {
     const { data } = await axios({ method: 'delete', url: `/history/${id}`, headers: { token } })
-    return data.msg
+    return data
   }
 }

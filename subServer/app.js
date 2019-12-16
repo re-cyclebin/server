@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 mongoose.connect(`mongodb+srv://ericsudhartio:${process.env.MONGO_PASS}@cluster0-o92dt.mongodb.net/${process.env.MONGODB_URL}?retryWrites=true&w=majority`, { useFindAndModify: true, useNewUrlParser: true, useUnifiedTopology: true })
-  .then(a => console.log('MongoDb now connected', a.connections[0].host))
+  .then(a => console.log('MongoDb now connected', a.connections[0].name))
   .catch(console.log)
 
 // mongoose.connect(`mongodb://localhost/re-cycle-${process.env.NODE_ENV}`, { useFindAndModify: true, useNewUrlParser: true, useUnifiedTopology: true })

@@ -17,7 +17,8 @@ module.exports = {
   },
   async deleteTrashCan ({ id, token }) {
     const { data } = await axios({ method: 'delete', url: `/trashcan/admin/${id}`, headers: { token } })
-    return data.msg
+    console.log(data.msg, 'controller');
+    return data
   },
   async openTrashCan ({ id, token }) {
     const { data } = await axios({ method: 'patch', url: `/trashcan/status/${id}`, headers: { token } })

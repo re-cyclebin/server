@@ -57,8 +57,8 @@ module.exports = {
         catch(err) { throw new Error(err.response.data.msg) }
       },
       updateTrashLocation: async (parent, args) => {
-        const { token, longitude, latitude } = args;
-        try { return await updateLocationTrashCan({ token, latitude, longitude }) }
+        const { token, longitude, latitude, id } = args;
+        try { return await updateLocationTrashCan({ token, latitude, longitude, id }) }
         catch(err) { throw new Error(err.response.data.msg) }
       },
       deleteTrash: async (parent, args) => {

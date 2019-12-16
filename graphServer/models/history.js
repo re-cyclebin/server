@@ -22,7 +22,7 @@ module.exports = {
       showAllHistory (token: String) : [ History ]
     }
     extend type Mutation {
-      createHistory (token: String, id: String, height: Int, weight: Int): History,
+      createHistory (token: String, id: String): History,
       deleteHistory (token: String, id: String): MsgHistory
     }
   `,
@@ -35,8 +35,8 @@ module.exports = {
     },
     Mutation: {
       createHistory: async (parent, args) => {
-        const { token, id, height, weight } = args;
-        try { return await makeHistory({ token, id, height, weight }) }
+        const { token, id } = args;
+        try { return await makeHistory({ token, id }) }
         catch(err) { throw new Error({ msg: err.response.data.msg, errors: err.response.data.errors })}
       },
       deleteHistory: async (parent, args) => {

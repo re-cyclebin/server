@@ -328,7 +328,7 @@ describe('Testing for Trash Can Routes', _ => {
             expect(res.body.trash.avaible).to.be.an('boolean');
             expect(res.body.trash.height).to.be.a('number');
             expect(res.body.trash.weight).to.be.a('number');
-            expect(res.body.trash.height).to.equal(100.8-Number(update.height));
+            expect(res.body.trash.height).to.equal(40-Number(update.height));
             expect(res.body.trash.location).to.be.an('object').to.have.any.keys('latitude', 'longitude');
             expect(res.body.trash.location.longitude).to.be.a('string');
             expect(res.body.trash.location.latitude).to.be.a('string');
