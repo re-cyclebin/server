@@ -19,6 +19,7 @@ module.exports = {
   },
   async deleteSomeHistory ({ token, id }) {
     const { data } = await axios({ method: 'delete', url: `/history/${id}`, headers: { token } })
+    redis.del('saveHistory')
     return data
   }
 }

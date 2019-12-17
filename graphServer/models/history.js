@@ -4,10 +4,18 @@ const { gql } = require('apollo-server'),
 
 module.exports = {
   typeHistory: gql`
+    type Puller {
+      _id: String,
+      username: String,
+      email: String
+    }
+    type TrashId {
+      _id: String,
+    }
     type History {
       _id: String,
-      Puller: String,
-      TrashId: String,
+      Puller: Puller,
+      TrashId: TrashId,
       weight: Int,
       height: Int,
       createdAt: String,
