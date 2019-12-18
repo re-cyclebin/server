@@ -14,7 +14,7 @@ module.exports = {
       .catch(next)
   },
   getAllHistories ( req, res, next ) {
-    History.find().populate('Puller').populate('TrashId')
+    History.find().populate('Puller').populate('TrashId').sort([['createdAt', 'descending']])
       .then(histories => res.status(200).json({ histories }))
       .catch(next);
   },
