@@ -3,6 +3,7 @@ const chai = require('chai'),
   app = require('../app'),
   { Trash, User } = require('../models'),
   { jwt } = require('../helpers'),
+  { redis } = require('../cache'),
   { signToken } = jwt
 
 chai.use(chaiHttp);
@@ -329,6 +330,7 @@ describe('Testing for Trash Can Routes', _ => {
             expect(res.body.trash.height).to.be.a('number');
             expect(res.body.trash.weight).to.be.a('number');
             expect(res.body.trash.height).to.equal(40-Number(update.height));
+            expect(res.body.trash.weight).to.equal(update.weight * 100);
             expect(res.body.trash.location).to.be.an('object').to.have.any.keys('latitude', 'longitude');
             expect(res.body.trash.location.longitude).to.be.a('string');
             expect(res.body.trash.location.latitude).to.be.a('string');
@@ -349,7 +351,7 @@ describe('Testing for Trash Can Routes', _ => {
             expect(res).to.have.status(200);
             expect(res.body).to.be.an('object').to.have.any.keys('trash')
             expect(res.body.trash).to.be.an('object').to.have.any.keys('_id', 'height', 'weight', 'avaible', 'status');
-            expect(res.body.trash._id).to.be.a('string');
+            expect(res.body.trash._id) .to.be.a('string');
             expect(res.body.trash.height).to.be.a('number');
             expect(res.body.trash.weight).to.be.a('number');
             expect(res.body.trash.avaible).to.be.a('boolean');
@@ -795,7 +797,7 @@ describe('Testing for Trash Can Routes', _ => {
   describe('GET /trashcan/iotstatus/:id IOT get iotstatus', _ => {
     let link = '/trashcan/iotstatus';
     describe('success process getting status', _ => {
-      it('should send an object status with 200 status code', done => {
+      it('should send an object status with 200 status code no redis', done => {
         chai
           .request(app)
           .get(link+`/${initialTrash2._id}`)

@@ -52,20 +52,16 @@ module.exports = {
   // -------------- IOT CONTROLLER ------------
   updateTrashPushUser ( req, res, next ) {
     const { height, weight } = req.body,
-      numHeight = 40 - height
-      console.log(height, weight)
-      console.log('==============')
-      console.log(numHeight)
+      numHeight = 40 - height,
+      numWeight = weight * 100
     if(!height || !weight) next({ status: 400, msg: 'missing height/weight value' })
     else {
       if(numHeight <= 30) {
-        console.log('masuk dbwh 30')
-        Trash.findByIdAndUpdate(req.params.id, { height: numHeight, weight }, { new: true })
+        Trash.findByIdAndUpdate(req.params.id, { height: numHeight, weight: numWeight }, { new: true })
           .then(trash => res.status(200).json({ trash }))
           .catch(next)
       } else {
-        console.log('masuk else')
-        Trash.findByIdAndUpdate(req.params.id, { avaible: false }, { new: true })
+        Trash.findByIdAndUpdate(req.params.id, { height: numHeight, weight: numWeight, avaible: false }, { new: true })
           .then(trash => res.status(200).json({ trash }))
           .catch(next)
       }
@@ -73,10 +69,10 @@ module.exports = {
   },
   async getStatusTrash ( req, res, next ) {
     // const getTrashIdStatus = await redis.get(`StatusTrash:${req.params.id}`)
-    // if(getTrashIdStatus) res.status(200).json(JSON.parse(getTrashIdStatus))
+    // if(getTrashIdStatus) {res.status(200).json(JSON.parse(getTrashIdStatus))}
     // else {
       Trash.findById(req.params.id)
-        .then(trash => {
+        .then(async trash => {
           // await redis.set(`StatusTrash:${req.params.id}`, JSON.stringify(trash.status))
           res.status(200).json(trash.status)
         })
